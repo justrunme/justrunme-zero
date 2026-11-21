@@ -12,6 +12,11 @@ import os from 'node:os'
 import path from 'node:path'
 import { run, runOk } from '../util/exec.js'
 
+/** Largest plain-SQL dump accepted; above it the dump fails closed (output limit exceeded). */
+export const PG_DUMP_MAX_OUTPUT_BYTES = 1024 * 1024 * 1024
+/** Largest database server log read; above it serverLog throws, never returns a partial log. */
+export const SERVER_LOG_MAX_OUTPUT_BYTES = 64 * 1024 * 1024
+
 const PROJECT_RE = /^[a-z0-9][a-z0-9_-]{0,62}$/
 
 /**
@@ -114,13 +119,14 @@ export async function psql(t, { sql, input, singleTransaction = false, asPlan = 
  */
 export async function dump(t, { privileges = false } = {}) {
   assertTarget(t)
-  return runOk('docker', ['exec', '-i', await containerOf(t, t.dbService), 'pg_dump', '-U', t.dbUser, '-d', t.dbName, '--no-owner', ...(privileges ? [] : ['--no-privileges'])], { timeoutMs: 120000, env: t.env })
+  return runOk('docker', ['exec', '-i', await containerOf(t, t.dbService), 'pg_dump', '-U', t.dbUser, '-d', t.dbName, '--no-owner', ...(privileges ? [] : ['--no-privileges'])], { timeoutMs: 120000, env: t.env, maxOutputBytes: PG_DUMP_MAX_OUTPUT_BYTES })
 }
 
 /** Everything the database container wrote to stdout and stderr so far (the server log). */
 export async function serverLog(t) {
   assertTarget(t)
-  const r = await run('docker', ['logs', await containerOf(t, t.dbService)], { timeoutMs: 60000, env: t.env })
+  const r = await run('docker', ['logs', await containerOf(t, t.dbService)], { timeoutMs: 60000, env: t.env, maxOutputBytes: SERVER_LOG_MAX_OUTPUT_BYTES })
+  if (r.outputOverflow) throw new Error('docker logs failed: output limit exceeded, log would be incomplete')
   if (r.code !== 0) throw new Error(`docker logs failed: ${errorSummaryLine(r.stderr)}`)
   return r.stdout + '\n' + r.stderr
 }
