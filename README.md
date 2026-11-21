@@ -4,22 +4,30 @@
 
 JustRunMe rehearses Kiro agents’ proposed changes on a disposable copy, measures their impact, gates the real run, and verifies recovery with signed evidence.
 
+**Who it’s for:** teams letting coding agents change PostgreSQL schemas and migrations.
+
 > The agent says “Just run me.” JustRunMe says “Prove it first.”
 
 An agent migration can silently delete orders through a database trigger. JustRunMe catches the loss in a disposable rehearsal before the real run.
 
 **Try it (Node.js 24+, local Docker):** `npm ci && node src/cli/index.js judge --text`
 
+**Limits:** this is a research/demo implementation, not a production safety boundary; see [Honest limits](#honest-limits).
+
 ## Proof you can check
 
 - **Judge quickstart:** [`npm ci` and `node src/cli/index.js judge --text`](docs/JUDGE_QUICKSTART.md) — a recorded fresh-clone judge run passed in **37.4 s** at `de256225`; the later `npm ci` + full-suite check at `0ea290b` was a separate run. Docker image was cached.
 - **Gate decisions:** [13 of 13 destructive actions denied, 1 harmless read allowed](docs/EXAMPLES.md) with the gate enabled. These are tool-call decisions, **not** database-rehearsal measurements or universal shell protection.
 - **Recorded Chaos Twin recovery:** [RECOVERY PROVEN, 21 checks, 0 failed](docs/evidence/chaos-live-2026-11-20/README.md) after a database `SIGKILL`, with a signed receipt and public key. Run the **portable receipt/anchor verification command** in that README; it is not the full CLI policy/history check. This twin does **not** sandbox untrusted host shell.
-- **Point-in-time test report:** [571 passed, 0 failed, 0 skipped on Node v24.22.3](docs/test-report.json), measured at commit **`5c2188327e008ea0ea76ff36325f8792ec7956d8`**, not this README head.
+- **Point-in-time test report:** [607 passed, 0 failed, 0 skipped on Node v24.22.3](docs/test-report.json), measured at commit **`8f2026756cd30ec7bf5a45fb36a1d40480462a56`**, not this README head.
 
 **Measured:** in one five-run-per-arm experiment, code review approved **5/5** destructive plans (each direct run lost **1 of 3** orders); JustRunMe denied **5/5** first rehearsals and the eventual real runs lost **0** orders. **Limit:** 3/5 revised plans bypassed the trigger during execution, so this is not proof of business-rule correctness. [Protocol and results](docs/agent-runs/T25-results-v1.md).
 
 ![Flight Recorder showing a denied, repaired and verified mission](docs/img/console-flight-recorder.png)
+
+## Why Frankenstein?
+
+A probabilistic [LLM agent](docs/agent-runs/2026-11-20-live2.md) is stitched to deterministic [PostgreSQL trigger inspection](src/rehearsal/measure.js) and [row-loss auditing](src/rehearsal/observe.js) that inspect triggers and measure lost rows; an [Ed25519 signed, hash-chained receipt ledger](src/receipts/chain.js) records what happened. [Chaos engineering](src/chaos/twin.js) kills the disposable database with `SIGKILL` and tests [verified undo](docs/evidence/chaos-live-2026-11-20/README.md); [human approval outside the agent channel](src/receipts/approver.js) gates the real run. These components complement, not replace, Kiro’s controls.
 
 “Zero” in the repository name means **zero unverified execution**, not zero risk.
 
@@ -53,7 +61,7 @@ The judge command uses throwaway demo resources: it rehearses a destructive plan
 
 | Capability | Evidence |
 | --- | --- |
-| Full automated suite: **571 passed, 0 failed, 0 skipped** on Node 24.22.3 | [Clean-tree test report](docs/test-report.json) (commit `5c21883`, not this README head) |
+| Full automated suite: **607 passed, 0 failed, 0 skipped** on Node 24.22.3 | [Clean-tree test report](docs/test-report.json) (commit `8f20267`, not this README head) |
 | Disposable rehearsal, approval, run and verified undo | [Demo integration tests](test/demo-judge.test.js) and [judge implementation](src/cli/index.js) |
 | Real Kiro agent workflow and recorded limits | [Live session 1](docs/agent-runs/2026-11-20-live1.md), [live session 2](docs/agent-runs/2026-11-20-live2.md) |
 | Hidden trigger experiment, including failed approaches | [T25 results](docs/agent-runs/T25-results-v1.md) |
