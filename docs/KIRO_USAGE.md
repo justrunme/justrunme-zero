@@ -2,9 +2,35 @@
 
 JustRunMe uses Kiro for specification, implementation and live agent checks. This page counts **recorded entries**, not unique model calls, and does not infer authorship from a commit alone.
 
+## How Kiro was used
+
+### IDE or CLI?
+
+Most recorded implementation work used Kiro CLI, as documented in the [session log](KIRO_LOG.md). Kiro IDE was tested separately for the `PreToolUse` hook: the [IDE report](agent-runs/2026-11-20-ide.md) records a hook not executing in an untrusted workspace, followed by a denial in a trusted session. These are different environments, not interchangeable proof.
+
+### Custom agents, and where?
+
+The repository defines [five workspace agents](../.kiro/agents/) for builder, operator, skeptic and T25 roles. A [recorded CLI v3 operator session](agent-runs/2026-11-20-live2.md) used `--v3 --agent justrunme-operator` to investigate a hidden database trigger, rehearse alternatives and request human approval. This demonstrates that session, not universal enforcement of agent permissions.
+
+### Hooks?
+
+The [hook definitions](../.kiro/hooks/) include a `PreToolUse` gate that is enabled only with `JUSTRUNME_GATE=on`. The [gate run](agent-runs/2026-11-20-gate.md) records a denied destructive action; the [IDE report](agent-runs/2026-11-20-ide.md) also documents the untrusted-workspace limitation. Kiro already has hooks and permissions; JustRunMe adds measured, recorded decisions for the configured workflow.
+
+### Spec-driven or vibe coding?
+
+Work was tracked against [requirements](../.kiro/specs/justrunme-zero/requirements.md), [design](../.kiro/specs/justrunme-zero/design.md) and [task checkboxes](../.kiro/specs/justrunme-zero/tasks.md), with implementation attempts and manual corrections recorded in the [Kiro log](KIRO_LOG.md). This is a spec-driven workflow with iterative prompts, not a claim that every checked task has a separately traceable model call; the audit below identifies gaps.
+
+### Steering?
+
+The four [steering files](../.kiro/steering/) describe product scope, engineering rules and the operator loop. The [operator agent definition](../.kiro/agents/justrunme-operator.json) refers to the operator-loop steering file; the [recorded operator run](agent-runs/2026-11-20-live2.md) documents the actual CLI workflow rather than assuming every steering instruction was obeyed.
+
+### MCP?
+
+The [operator agent config](../.kiro/agents/justrunme-operator.json) declares the local `justrunme` MCP server at `src/mcp/server.js`. The [live CLI run](agent-runs/2026-11-20-live2.md) records its rehearsal, approval-request and run interactions; the [T25 reports](agent-runs/T25-results-v1.md) and [v2](agent-runs/T25-results-v2.md) distinguish experimental outcomes from general performance claims.
+
 ## Recorded evidence
 
-- [Kiro session log](KIRO_LOG.md): **36 numbered Run headings** (1–5 and 7–37; Run 6 is not recorded). Several headings include multiple attempts or follow-up edits, so 36 is not a count of invocations.
+- [Kiro session log](KIRO_LOG.md): **40 primary numbered Run headings** (Runs 1–40 inclusive; Run 6 is recorded as a level-three heading). Additional follow-up and loop subheadings are not counted. Several headings include multiple attempts or follow-up edits, so 40 is not a count of invocations.
 - [Specification and task checkboxes](../.kiro/specs/justrunme-zero/tasks.md): requirements, design and task tracking.
 - [Steering](../.kiro/steering/): **4 current files** (product, engineering, scope, operator loop).
 - [Agents](../.kiro/agents/): **5 current definitions** (builder, skeptic, operator and two T25 roles).

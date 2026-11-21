@@ -1200,3 +1200,19 @@ Run 37, continued (review of PR #27, narrow fixes). Rebased onto `main` after PR
 - Manual review/fix: corrected `checkNode` so undefined/unparseable versions fail closed (the first targeted run failed 1 test). Targeted re-run: 7/7 PASS. Full npm test result is recorded in the task report.
 
 Run 38, Round 1 review correction (2026-11-21): Kiro CLI invoked from repo root without `--agent` (workspace builder mode unsupported by CLI 3.5.0), with steering/spec instructions, to adjust only preflight code and tests. Kiro changed `src/judge/preflight.js` and `test/judge-preflight.test.js`: Docker daemon `info` timeout increased from 8000 to 20000 ms to match existing context/version probes; Docker CLI `--version` remains 8000 ms; nonzero/timeout still fail closed; happy-path test asserts the 20000-ms finite daemon timeout. Kiro did not run tests. Owner ran tests and CI separately; see Round 1 task report. No other files edited by Kiro.
+
+---
+## Run 39 — Gate examples pack (retrospective entry, 2026-11-21)
+
+- Task: `2026-11-21-34-gate-examples-pack.md`; branch `test/gate-examples`; PR #39; final head `43de59d1d25537b891695e5c9565e268554c40d6`. Date/time of the original Kiro call and model were not recorded in the archived report.
+- Kiro CLI produced the initial `test/gate-examples.test.js` test file. The report does not give its exact prompt or spec task IDs.
+- Manual fixes: test harness input stream `Buffer` and temporary workspace path without spaces; `docs/EXAMPLES.md` written manually. No Kiro authorship claimed for that document.
+- Verification reported: Node 24.22.3 targeted tests 16/16 PASS, full `npm test` 589 PASS, 0 failed, 0 skipped; initial foreground run was interrupted, durable rerun passed.
+- Scope: 13 destructive denies and one harmless allow with observed hook decisions, signed receipts and chain verification; not exhaustive containment or rehearsal measurements. The gate requires a trusted workspace and `JUSTRUNME_GATE=on`.
+
+## Run 40 — CLI agent selection check (2026-11-21, Europe/Berlin)
+
+- Task: `2026-11-21-45-kiro-usage-story.md`; spec task IDs: none (documentation and compatibility check). Kiro CLI 3.5.0, v3; model and credit usage not reported.
+- Exact command from repo root: `kiro-cli chat --no-interactive --trust-workspace --v3 --agent justrunme-builder 'reply OK only'`.
+- Exit code 0. Stdout began `OK` immediately followed by `Session-end check:` and a checklist stating no files were modified, no git operations were performed, and tests were not run. Stderr: `[INFO] [KRS] <-- GenerateAssistantResponseCommand done totalEvents=5`. This is **not** an exact-`OK`-only response.
+- Kiro generated no code or documents in this check; the current documentation edits were made manually. Agent selection working does not prove that tool permissions or filesystem restrictions are enforced.
