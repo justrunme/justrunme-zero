@@ -4,8 +4,8 @@ Verified on a fresh `origin/main` clone at **`0ea290b97be9bc199fa802f61bd0f6043a
 
 ## Before recording
 
-- [ ] Open a clean terminal at the repository root. Run `npm ci`, `node --version` (24+), `docker info`. If the image is not cached, `docker pull postgres:16.3-alpine` before recording; do not present a pre-pulled image as a cold pull.
-- [ ] Run `node src/cli/index.js judge --text` once off-camera. Require exit 0 and actual `PASS`; never overlay a synthetic result.
+- [ ] Open a clean terminal at the repository root. Run `unset DOCKER_DEFAULT_PLATFORM`, then `npm ci`, `node --version` (24+), `docker info`. If the image is not cached, `docker pull postgres:16.3-alpine` before recording; do not present a pre-pulled image as a cold pull.
+- [ ] Run `node src/cli/index.js judge --hidden-trigger --text` once off-camera, after `unset DOCKER_DEFAULT_PLATFORM`. Require exit 0 and actual `PASS`; never overlay a synthetic result.
 - [ ] Start `node src/cli/index.js console --port 8765` (choose a free port). Open the **tokenized URL printed by the CLI** in a private browser tab; never record, paste into notes, or share the token. Subsequent `#/...` routes must be opened in this authenticated tab.
 - [ ] Confirm the `RECORDED RUN · READ ONLY` banner is visible. Use readable zoom and hide browser chrome, personal tabs, environment variables and notifications.
 

@@ -1,25 +1,33 @@
-# JustRunMe
+# JustRunMe — Rehearse. Run. Recover.
 
-**Rehearse. Run. Recover.**
+**Your AI agent thinks the database change is safe. JustRunMe proves whether it is.** A hidden PostgreSQL trigger silently deletes a customer order. JustRunMe catches the loss **before the real run**, blocks the dangerous change, executes a verified safe alternative, and proves recovery with signed evidence. **Rehearse. Run. Recover.**
 
-JustRunMe rehearses Kiro agents’ proposed changes on a disposable copy, measures their impact, gates the real run, and verifies recovery with signed evidence.
+**Built for** developers and teams using Kiro agents to change PostgreSQL-backed applications. [The hidden-trigger scenario](docs/JUDGE_QUICKSTART.md) runs against real PostgreSQL in Docker: **orders 3 → 2 · DENY DATA_LOSS → SAFE (0 lost) → RECOVERED**. [Judge integration tests](test/demo-judge.test.js) exercise this path.
 
-**Who it’s for:** teams letting coding agents change PostgreSQL schemas and migrations.
+**Run the headline demo** (Node.js 24+, local Docker):
 
-> The agent says “Just run me.” JustRunMe says “Prove it first.”
+```sh
+npm ci
+node src/cli/index.js judge --hidden-trigger --text
+```
 
-An agent migration can silently delete orders through a database trigger. JustRunMe catches the loss in a disposable rehearsal before the real run.
+For the shorter standard judge run: `node src/cli/index.js judge --text`. Both use disposable demo resources. [Quickstart and expected output](docs/JUDGE_QUICKSTART.md).
 
-**Try it (Node.js 24+, local Docker):** `npm ci && node src/cli/index.js judge --text`
+### Not just the database
 
-**Limits:** this is a research/demo implementation, not a production safety boundary; see [Honest limits](#honest-limits).
+- **Workspace rehearsal:** a disposable Git worktree carries the workspace changes into rehearsal. [Implementation](src/rehearsal/workspace.js).
+- **Verified undo:** captured PostgreSQL data, schema and grants, allowed workspace files and contract configuration are restored and checked; recovery verification covers rows, checksums, files, images and configured health checks. [Undo grants test](test/demo-undo-grants.test.js) · [Recovery integration test](test/demo-chaos.test.js).
+- **Signed gate decisions:** the opt-in Kiro `PreToolUse` hook can deny dangerous shell operations and protected-file changes, with signed receipts. [Hook tests](test/hook.test.js).
+- **Agent workflow:** nine MCP tools support rehearsal, impact reports, approvals requested out-of-band, execution, undo and verification; no MCP tool can approve. [MCP tests](test/demo-mcp.test.js) · [Tool contract](test/hook.test.js).
+- **Crash recovery:** Chaos Twin kills the disposable PostgreSQL container with `SIGKILL` and checks verified recovery. [Docker integration test](test/demo-chaos.test.js) · [Recorded evidence](docs/evidence/chaos-live-2026-11-20/README.md).
+- **Gate health:** `justrunme gate-probe` distinguishes an active gate from an inactive one. [Gate tests](test/gate.test.js).
 
 ## Proof you can check
 
 - **Judge quickstart:** [`npm ci` and `node src/cli/index.js judge --text`](docs/JUDGE_QUICKSTART.md) — a recorded fresh-clone judge run passed in **37.4 s** at `de256225`; the later `npm ci` + full-suite check at `0ea290b` was a separate run. Docker image was cached.
 - **Gate decisions:** [13 of 13 destructive actions denied, 1 harmless read allowed](docs/EXAMPLES.md) with the gate enabled. These are tool-call decisions, **not** database-rehearsal measurements or universal shell protection.
 - **Recorded Chaos Twin recovery:** [RECOVERY PROVEN, 21 checks, 0 failed](docs/evidence/chaos-live-2026-11-20/README.md) after a database `SIGKILL`, with a signed receipt and public key. Run the **portable receipt/anchor verification command** in that README; it is not the full CLI policy/history check. This twin does **not** sandbox untrusted host shell.
-- **Point-in-time test report:** [607 passed, 0 failed, 0 skipped on Node v24.22.3](docs/test-report.json), measured at commit **`8f2026756cd30ec7bf5a45fb36a1d40480462a56`**, not this README head.
+- **Current main verification:** **649 passed, 0 failed, 0 skipped** (`npm test` at `38316068d4fbf225c6ca379cdca6869bcbe49c3f`). The [historical clean-tree report](docs/test-report.json) records 607 passes at `8f2026756cd30ec7bf5a45fb36a1d40480462a56`.
 
 **Measured:** in one five-run-per-arm experiment, code review approved **5/5** destructive plans (each direct run lost **1 of 3** orders); JustRunMe denied **5/5** first rehearsals and the eventual real runs lost **0** orders. **Limit:** 3/5 revised plans bypassed the trigger during execution, so this is not proof of business-rule correctness. [Protocol and results](docs/agent-runs/T25-results-v1.md).
 
@@ -51,6 +59,7 @@ Requires **Node.js 24+**, **Docker** with a local daemon, and the demo's Postgre
 
 ```sh
 npm ci
+node src/cli/index.js judge --hidden-trigger --text
 node src/cli/index.js judge --text
 node src/cli/index.js console
 ```
@@ -61,7 +70,7 @@ The judge command uses throwaway demo resources: it rehearses a destructive plan
 
 | Capability | Evidence |
 | --- | --- |
-| Full automated suite: **607 passed, 0 failed, 0 skipped** on Node 24.22.3 | [Clean-tree test report](docs/test-report.json) (commit `8f20267`, not this README head) |
+| Full automated suite: **649 passed, 0 failed, 0 skipped** on current main | `npm test` at `38316068d4fbf225c6ca379cdca6869bcbe49c3f` (this run); [historical report](docs/test-report.json) at `8f20267` |
 | Disposable rehearsal, approval, run and verified undo | [Demo integration tests](test/demo-judge.test.js) and [judge implementation](src/cli/index.js) |
 | Real Kiro agent workflow and recorded limits | [Live session 1](docs/agent-runs/2026-11-20-live1.md), [live session 2](docs/agent-runs/2026-11-20-live2.md) |
 | Hidden trigger experiment, including failed approaches | [T25 results](docs/agent-runs/T25-results-v1.md) |
