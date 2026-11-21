@@ -39,6 +39,26 @@ judge: ok (exit 0)
 PASS in 37.4 s (budget 60 s, enforced)
 ```
 
+## Hidden-trigger hero case (opt-in)
+
+After the default judge check, run the additional PostgreSQL trigger case with Docker running:
+
+```sh
+node src/cli/index.js judge --hidden-trigger --text
+```
+
+The `--text` flag prints the hidden-trigger verdict and order counts as readable lines; omit `--text` to inspect the full JSON under `result.story.hidden_trigger.*`. The [CLI formatter](../src/cli/index.js) and [scenario](../src/judge/scenario.js) implement both forms.
+
+- The apparently harmless `UPDATE patches SET available_count = 0 WHERE id = 1` fires the database trigger `patches_release_sold_out`, deleting an open order. The rehearsal measures **DATA LOSS**, with orders **3 → 2** and the trigger identified.
+- Authorization of that destructive plan returns **DENY / `DATA_LOSS`**.
+- The alternative rehearses as **SAFE**, with **0 orders lost**.
+- The authorized real-database run applies the safe alternative and preserves **all 3 orders**.
+- Undo reports **`RECOVERED`** and recovery verification **`PASS`**.
+
+These are checked in the [Docker integration test](../test/demo-judge.test.js) against the [scenario result](../src/judge/scenario.js); the [recorded agent run](agent-runs/2026-11-20-live2.md) provides additional execution context. The full JSON fields include `result.story.hidden_trigger.trigger`, `.dangerous`, `.denied`, `.safe`, `.run` and `.undo`.
+
+This is **opt-in** because the full run performs four rehearsals (two default and two hidden-trigger), rather than the default two. The [report contract](../src/judge/report.js) sets a separate **90-second** budget for `--hidden-trigger`, versus **60 seconds** for default judge. When the budget is enforced (images already cached), exceeding it produces **`FAIL`** with an **`OVER_BUDGET`** finding. First-time image downloads are timed but exempt from budget enforcement, as the report states.
+
 The step report confirmed a destructive rehearsal denied, a safe alternative rehearsed and authorized, the real run, undo and recovery verification, offline receipt verification, and tamper detection. It ended with:
 
 ```text
