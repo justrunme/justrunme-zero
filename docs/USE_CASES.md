@@ -17,6 +17,7 @@
 | Gate health | **ACTIVE / INACTIVE** probe states | [Gate test](../test/gate.test.js) |
 | Plan history | Changed or swapped archived evidence detected | [History test](../test/history.test.js) |
 | Output and cleanup limits | Oversized output and incomplete cleanup fail closed | [Output tests](../test/exec-output-cap.test.js), [cleanup tests](../test/cleanup.test.js) |
+| Console Proof chain | Saved hidden-trigger Judge report shows five steps (DATA LOSS → DENIED → SAFE plan → RECOVERED → VERIFIED); missing or malformed `--judge-report` refuses startup with `JUDGE_REPORT_INVALID`. Run `node src/cli/index.js judge --hidden-trigger > judge.json`, then `node src/cli/index.js console --judge-report judge.json` and open `proof_chain_url` (`#/proof`). | [Proof chain tests](../test/console-proof-chain.test.js), [saved Judge fixture](../test/fixtures/judge-hidden-trigger-report.json) |
 | Signed chaos metadata | Git state, parameters and artifact hashes signed; tampering detected | [Chaos unit tests](../test/chaos.test.js) |
 
 ## Hidden trigger: data loss before production
