@@ -69,6 +69,10 @@ receipts verified: 8, mismatches: 0, policy violations: 0
 
 For the Console, use `node src/cli/index.js console --port 47891` (or omit `--port` for its default). Open the localhost URL printed in its JSON output, including its **private token fragment**. This check verified the HTML HTTP response and title, **not** a full interactive browser walkthrough. Stop it with Ctrl-C when finished. The **Proof chain** screen shows the hidden-trigger story as five steps from a saved judge run: `node src/cli/index.js judge --hidden-trigger > judge.json`, then `node src/cli/index.js console --judge-report judge.json` and open the `proof_chain_url` it prints.
 
+## One-byte tamper demonstration
+
+The [recording runbook](submission/RECORDING_RUNBOOK.md) reproduces the receipt-chain tamper check on a **copy** of `demo/recorded-run`, with anchors and `operator.pub` installed in a throwaway `JUSTRUNME_HOME`. Run `JUSTRUNME_HOME=<throwaway-home> node src/cli/index.js verify --repo <throwaway-copy> --mission mission-t25v2-a`: the clean chain returns **exit 0**, changing byte 30 of the copied `receipts.jsonl` returns **exit 30** with mission, signature and previous-hash findings, and restoring the byte returns **exit 0**. The existing judge steps `tamper_detected` and `tamper_restored` exercise this integrity check as part of the judge scenario.
+
 ## Troubleshooting and gaps found
 
 1. **Full test suite now passes on Node 26.** The fresh clone at `de25622` passed 573/573 tests (exit 0, 117 s). The earlier 10 live-run failures recorded against `316625a` are no longer reproduced. This confirms the tested revision and environment, not every platform or future revision.
