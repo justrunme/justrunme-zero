@@ -22,6 +22,7 @@ import { main } from '../cli/index.js'
 import { openRecorded, serialized, RECORDED_LABEL } from './recorded.js'
 import { readTestReport } from './metrics.js'
 import { setupStatus } from './setup.js'
+import { loadJudgeReport } from './judgereport.js'
 
 const STATIC = {
   '/': ['index.html', 'text/html; charset=utf-8'],
@@ -33,6 +34,7 @@ const STATIC = {
   '/home.js': ['home.js', 'text/javascript; charset=utf-8'],
   '/onboarding.js': ['onboarding.js', 'text/javascript; charset=utf-8'],
   '/evidence.js': ['evidence.js', 'text/javascript; charset=utf-8'],
+  '/proofchain.js': ['proofchain.js', 'text/javascript; charset=utf-8'],
   '/style.css': ['style.css', 'text/css; charset=utf-8'],
 }
 const STATIC_DIR = new URL('./static/', import.meta.url)
@@ -80,10 +82,12 @@ function tokenMatches(header, token) {
 }
 
 /**
- * @param {{ repoDir: string, mission?: string, port?: number, token?: string, cliPath?: string, env?: NodeJS.ProcessEnv }} cfg
+ * `judgeReport` is the saved judge report of the Proof chain screen, as loadJudgeReport()
+ * returns it (read once, read only); without it the screen says that no report is loaded.
+ * @param {{ repoDir: string, mission?: string, port?: number, token?: string, cliPath?: string, env?: NodeJS.ProcessEnv, judgeReport?: ReturnType<typeof loadJudgeReport> }} cfg
  * @returns {Promise<{ url: string, port: number, token: string, close: () => Promise<void> }>}
  */
-export async function startConsole({ repoDir, mission, port = 0, token = randomBytes(32).toString('hex'), cliPath, env, recordedDir, testReportFile }) {
+export async function startConsole({ repoDir, mission, port = 0, token = randomBytes(32).toString('hex'), cliPath, env, recordedDir, testReportFile, judgeReport = loadJudgeReport(undefined) }) {
   if (!/^[0-9a-f]{64}$/.test(token)) throw new Error('the console token must be 64 hex characters')
   // Live reads and recorded reads share one process, and the key directory comes from the
   // environment, so every in-process read goes through the same lock.
@@ -124,6 +128,7 @@ export async function startConsole({ repoDir, mission, port = 0, token = randomB
   const routes = {
     'GET /api/sources': () => sources(),
     'GET /api/metrics': () => readTestReport(testReportFile ?? DEFAULT_REPORT),
+    'GET /api/judge-report': () => ({ ok: judgeReport.state === 'loaded', ...judgeReport }),
     'GET /api/setup': () => setupStatus({ repoDir, runMain: (argv) => serialized(() => main(argv)) }),
     'GET /api/missions': (q) => apiFor(q.get('source')).missions(),
     'GET /api/state': (q) => apiFor(q.get('source')).state(q.get('mission')),

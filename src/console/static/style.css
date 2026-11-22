@@ -593,3 +593,33 @@ body.is-home .side { display: none; }
 .decided { display: flex; align-items: center; gap: 6px; margin: 2px 0 10px; font-weight: 600; }
 .decided .icon { width: 15px; height: 15px; color: var(--green); }
 .xcard.warn { border-top-color: var(--amber); }
+
+/* Proof chain: five large steps, readable at 1080p. Green and red come from the one colour language above. */
+.proofchain { max-width: 1600px; margin: 0 auto; }
+.proofchain h1 { font-size: 40px; margin: 8px 0 28px; }
+.pc-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+.pc-step { display: grid; grid-template-columns: 56px 48px minmax(300px, 1fr) minmax(300px, 1.2fr) minmax(200px, 0.8fr); align-items: center; gap: 24px; padding: 26px 32px; background: var(--panel); border: 2px solid var(--line2); border-left-width: 10px; border-radius: 14px; }
+.pc-step.ok { border-color: var(--green); }
+.pc-step.bad { border-color: var(--red); }
+.pc-step.mute { border-color: var(--grey); }
+.pc-n { font: 700 28px var(--mono); color: var(--muted); }
+.pc-ico .icon { width: 44px; height: 44px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.pc-step.ok .pc-ico { color: var(--green); }
+.pc-step.bad .pc-ico { color: var(--red); }
+.pc-step.mute .pc-ico { color: var(--grey); }
+.pc-label { font-size: 34px; font-weight: 800; letter-spacing: 0.01em; }
+.pc-step.ok .pc-label { color: var(--green); }
+.pc-step.bad .pc-label { color: var(--red); }
+.pc-value { font: 600 30px var(--mono); color: var(--text); }
+.pc-detail { font-size: 22px; color: var(--muted); }
+.pc-detail { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.pc-fact { color: var(--text); }
+.pc-judge { font: 600 18px var(--mono); padding: 2px 10px; border-radius: 999px; border: 1px solid var(--grey); color: var(--muted); }
+.pc-judge.ok { border-color: var(--green); color: var(--green); }
+.pc-judge.bad { border-color: var(--red); color: var(--red); }
+.pc-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px 28px; margin: 8px 0 28px; }
+.pc-head h1 { margin: 0; }
+.pc-overall { font: 800 30px var(--mono); padding: 4px 18px; border-radius: 10px; border: 2px solid var(--grey); color: var(--muted); }
+.pc-overall.ok { border-color: var(--green); color: var(--green); }
+.pc-overall.bad { border-color: var(--red); color: var(--red); }
+.pc-source { font-size: 20px; }

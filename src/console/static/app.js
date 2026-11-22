@@ -10,6 +10,7 @@ import { approvalsScreen, impactScreen, missionsScreen, noticeBar, recoveryScree
 import { homeScreen } from './home.js'
 import { setupScreen } from './onboarding.js'
 import { evidenceScreen } from './evidence.js'
+import { proofChainScreen } from './proofchain.js'
 
 const SCREENS = {
   home: (state, ctx) => homeScreen(ctx),
@@ -19,6 +20,7 @@ const SCREENS = {
   approvals: approvalsScreen,
   recovery: recoveryScreen,
   evidence: evidenceScreen,
+  proof: proofChainScreen,
 }
 const KEY = 'justrunme-console-token'
 
@@ -62,6 +64,7 @@ const empty = () => ({ list: [], next: {}, single: null, error: null })
 const store = { live: empty(), recorded: empty() }
 let sources = null // what each source offers (GET /api/sources)
 let metrics = null // the test report, or why there is none
+let judge = null // the saved judge report of the Proof chain screen (GET /api/judge-report), or why there is none
 let lastText = ''
 let setup = null // { mode: 'live' | 'recorded', status, error } for the Setup screen
 let loadError = null // why the Console API could not be read; while set, no screen shows data or its absence
@@ -168,7 +171,7 @@ function render({ keep = false } = {}) {
   const kept = keep ? viewState() : null
   for (const a of document.querySelectorAll('.tabs a')) a.classList.toggle('active', a.dataset.screen === r.screen)
   document.body.classList.toggle('is-home', home)
-  renderSourceBar(home)
+  renderSourceBar(home || r.screen === 'proof')
   if (!token) {
     view.replaceChildren(stateBox('empty', 'No console token', 'Open the URL that `justrunme console` printed; it carries the token for this session.'))
     return
@@ -183,7 +186,7 @@ function render({ keep = false } = {}) {
   const state = cur ? statesOf()[cur] : S().single
   const all = missionsOf().map((m) => ({ mission_id: m.mission_id, state: statesOf()[m.mission_id] })).filter((m) => m.state)
   const ctx = {
-    api, reload, rerender: render, ui, route: r, all, mission: cur, readOnly: ui.source === 'recorded', setup, titles: titlesOf(),
+    api, reload, rerender: render, ui, route: r, all, mission: cur, readOnly: ui.source === 'recorded', setup, titles: titlesOf(), judge,
     home: {
       sources, metrics, pending: livePending(), recStates: store.recorded.next, go, source: ui.source,
       receipt: (mission, seq) => raw(`/api/receipt/${seq}?mission=${encodeURIComponent(mission)}&source=recorded`),
@@ -194,6 +197,11 @@ function render({ keep = false } = {}) {
     picker.parentElement.hidden = true
     view.replaceChildren(SCREENS[r.screen](null, ctx))
     if (r.screen === 'setup' && setup === null) loadSetup()
+  } else if (r.screen === 'proof') {
+    // The Proof chain reads only the saved judge report, never the missions of a source.
+    chainstate.replaceChildren()
+    picker.parentElement.hidden = true
+    view.replaceChildren(SCREENS.proof(null, ctx))
   } else {
     if (!state) {
       chainstate.replaceChildren()
@@ -259,6 +267,7 @@ async function reload() {
   try {
     sources = await raw('/api/sources')
     metrics = await raw('/api/metrics').catch((e) => (e.status === 401 ? Promise.reject(e) : { state: 'invalid', reason: 'the test report could not be read' }))
+    judge = await raw('/api/judge-report').catch((e) => (e.status === 401 ? Promise.reject(e) : { state: 'error', reason: `the judge report could not be read: ${e.message}`, report: null }))
     loadError = null
   } catch (e) {
     loadError = e
@@ -304,8 +313,9 @@ async function poll() {
   }
 }
 
-// Keys 1 to 7 open the seven screens; Escape closes a SQL panel shown over the full width.
-const ORDER = ['home', 'missions', 'impact', 'approvals', 'recovery', 'evidence', 'setup']
+// Keys 1 to 8 open the eight screens; Escape closes a SQL panel shown over the full width.
+// Proof chain is also accessible via tab 7; the printed URL opens the saved report directly.
+const ORDER = ['home', 'missions', 'impact', 'approvals', 'recovery', 'evidence', 'proof', 'setup']
 document.addEventListener('keydown', (e) => {
   const t = e.target
   if (e.key === 'Escape') {

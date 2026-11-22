@@ -378,14 +378,14 @@ describe('Evidence steps and navigation', () => {
     const labels = evidenceSteps(story, A).map((s) => s.label)
     assert.deepEqual(labels, ['PROPOSED', 'DATA LOSS', 'LOGIC BYPASS', 'SAFE'])
   })
-  it('the shell has a Home tab first, opens on Home, offers keys 1 to 7, and keeps scroll and open panels on a refresh', () => {
+  it('the shell has a Home tab first, opens on Home, offers keys 1 to 8, and keeps scroll and open panels on a refresh', () => {
     const html = readFileSync(path.join(STATIC, 'index.html'), 'utf8')
     const tabs = [...html.matchAll(/data-screen="(\w+)"/g)].map((m) => m[1])
-    assert.deepEqual(tabs, ['home', 'missions', 'impact', 'approvals', 'recovery', 'evidence', 'setup'])
+    assert.deepEqual(tabs, ['home', 'missions', 'impact', 'approvals', 'recovery', 'evidence', 'proof', 'setup'])
     assert.match(html, /id="sourcebar"/)
     const app = readFileSync(path.join(STATIC, 'app.js'), 'utf8')
     assert.match(app, /screen: 'home', arg: null/, 'an unknown route is Home')
-    assert.match(app, /const ORDER = \['home', 'missions', 'impact', 'approvals', 'recovery', 'evidence', 'setup'\]/)
+    assert.match(app, /const ORDER = \['home', 'missions', 'impact', 'approvals', 'recovery', 'evidence', 'proof', 'setup'\]/)
     assert.match(app, /n >= 1 && n <= ORDER\.length/)
     assert.match(app, /render\(\{ keep: true \}\)/, 'the poll re-renders with the view state kept')
     assert.match(app, /window\.scrollTo\(0, s\.y\)/)
