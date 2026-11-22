@@ -30,6 +30,15 @@ For the shorter standard judge run: `node src/cli/index.js judge --text`. Both u
 - **Gate decisions:** [13 of 13 destructive actions denied, 1 harmless read allowed](docs/EXAMPLES.md) with the gate enabled.
 - **Recorded Chaos Twin recovery:** [RECOVERY PROVEN, 21 checks, 0 failed](docs/evidence/chaos-live-2026-11-20/README.md) after a database `SIGKILL`, with a signed receipt and public key. Run the **portable receipt/anchor verification command** in that README.
 - **Hidden-trigger repeatability:** [4/4 PASS runs](docs/evidence/hidden-trigger-runs.md) (three in a checkout, one fresh clone), **16 signed receipts / 0 mismatches each**, with real PostgreSQL in Docker.
+- **Console Proof chain:** see the hidden trigger lose an order, the dangerous plan denied, the safe plan preserve every row, and undo verified — all from a saved judge report. [Runbook](docs/JUDGE_QUICKSTART.md):
+
+  ```sh
+  node src/cli/index.js judge --hidden-trigger > judge.json
+  node src/cli/index.js console --judge-report judge.json
+  ```
+
+  Open the printed `proof_chain_url`.
+
 - **Current merged-head verification:** **730 passed, 0 failed, 0 skipped** (`JRM_DOCKER_TESTS=1 npm test` on merged head `59336dac2a1630759d3f294f8f2eb672a1ea0519`). The [historical clean-tree report](docs/test-report.json) records 607 passes at `8f2026756cd30ec7bf5a45fb36a1d40480462a56`.
 
 **Measured:** in one five-run-per-arm experiment, code review approved **5/5** destructive plans (each direct run lost **1 of 3** orders); JustRunMe denied **5/5** first rehearsals and the eventual real runs lost **0** orders. [Protocol and results](docs/agent-runs/T25-results-v1.md).
