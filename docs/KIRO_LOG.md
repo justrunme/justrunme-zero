@@ -1276,3 +1276,13 @@ Run 38, Round 1 review correction (2026-11-21): Kiro CLI invoked from repo root 
 - Verification: Kiro CLI reported 635/635 tests and 3/3 Docker tests; the task report separately records `npm test` 635 passed, 0 failed/skipped and `JRM_DOCKER_TESTS=1 node --test test/demo-judge.test.js` 3 passed, 0 failed. Independently exercised cached-image Judge: default PASS in 37.2 s (60 s budget), hidden-trigger PASS in 66.3 and 66.5 s (90 s budget); trigger fired once, unsafe plan DENY DATA_LOSS, safe alternative SAFE, 0 rows lost, real run retained 3 orders, undo RECOVERED, 16 receipts and 0 mismatches. `git diff --check` PASS. The 90 s opt-in budget can fail on slower machines; no production targets tested.
 - Commit/PR: original branch head `16fa858`; merged PR #56, squash commit `ddcbb40`.
 - Source: `~/aivaro-tasks/archive/2026-11-21-51-judge-hidden-trigger/report.md`.
+
+## Run 47 — Safe plan business semantics (2026-11-22, Europe/Berlin)
+- Task: `2026-11-22-57-safe-plan-business-semantics.md`; branch `test/safe-plan-semantics`; spec task IDs: none reported.
+- Kiro CLI: non-interactive; first invocation stopped because file-write tool approval was not granted in that session and wrote nothing; retry used `--trust-all-tools`. Version, model and credits: not reported.
+- Prompt summary: test that the hidden-trigger safe plan preserves the declared business meaning, using real Docker/Postgres, and document the observed semantics in the Judge quickstart. Exact prompt not reported.
+- Kiro generated: `test/demo-safe-plan-semantics.test.js` and one paragraph in `docs/JUDGE_QUICKSTART.md`; no product code changed. The test checks all three orders and five patch rows before and after the safe run and verified undo: only order 2 is cancelled, orders 1 and 3 remain open, patch 1 availability changes 80 to 0, and undo restores seed fields.
+- Manual adjustments: review, independent full test run, git commit, push and PR creation were outside Kiro; no manual code changes reported.
+- Verification: per Kiro CLI, `JRM_DOCKER_TESTS=1 node --test test/demo-safe-plan-semantics.test.js` 1 PASS, 0 failed (real Docker/Postgres). Independently run `npm test`: 649 PASS, 0 failed, 0 skipped, exit 0 (114.9 s). `git diff --check` and `git diff --cached --check` PASS. Review confirmed Linux CI green. This proves the demo's declared business rule, not that cancelling an existing order is universally appropriate.
+- Commit/PR: branch final head `fe38da6c870256c21265f4dcdeb0bc9378f81ff7`; merged PR #62, squash commit `36e9ddf`.
+- Source: `~/aivaro-tasks/archive/2026-11-22-57-safe-plan-business-semantics/report.md` and `review.md`.
