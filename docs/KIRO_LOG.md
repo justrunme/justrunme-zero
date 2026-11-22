@@ -1256,3 +1256,23 @@ Run 38, Round 1 review correction (2026-11-21): Kiro CLI invoked from repo root 
 - Verification: Kiro reported 41/41 focused tests PASS and real Judge PASS with verified clean cleanup (41.3 s); independent Node 24.22.3 `npm test` 623 PASS, 0 failed, 0 skipped; `git diff --check` PASS. Docker failure paths used injected runner, success used real Docker. Original report recorded Node 24 CI pending.
 - Commit/PR: Round 2 head `6b4d29f`; merged PR #54, squash commit `4f863cc`.
 - Source: `~/aivaro-tasks/archive/2026-11-21-49-judge-cleanup-status/report.md`.
+
+
+## Run 45 — Signed Chaos Twin run metadata (2026-11-21, Europe/Berlin)
+- Task: `2026-11-21-50-chaos-run-metadata.md`; branch `feat/chaos-run-metadata`; spec task IDs: none reported.
+- Kiro CLI: without `--agent`, with `--trust-all-tools`; version, model and credits: not reported.
+- Prompt summary: add signed Chaos Twin run metadata and tests, limited to `src/chaos/twin.js` and `test/chaos.test.js`.
+- Kiro generated: `src/chaos/twin.js` and `test/chaos.test.js`, covering signed git SHA/tracked-file dirty state, Node/Docker/PostgreSQL probes, scenario parameters and result-file hashes/byte counts, unavailable-value diagnostics and safety bounds.
+- Manual adjustments: no manual code changes; review, git commit and push were manual.
+- Verification: Kiro CLI reported `node --test test/chaos.test.js` 28/28 PASS; independently run Node 24.22.3 `npm test` 613/613 PASS, 0 failed/skipped; `git diff --check` PASS. Live Docker/PostgreSQL probes were not tested here (fakes only); CLI does not yet pass resultFiles and untracked files are excluded from the dirty flag.
+- Commit/PR: original branch head `9a0aaa6`; merged PR #55, squash commit `f2896a2`.
+- Source: `~/aivaro-tasks/archive/2026-11-21-50-chaos-run-metadata/report.md`.
+
+## Run 46 — Opt-in Judge hidden trigger (2026-11-21, Europe/Berlin)
+- Task: `2026-11-21-51-judge-hidden-trigger.md` (Round 2); branch `feat/judge-hidden-trigger`; spec task IDs: none reported.
+- Kiro CLI: without `--agent`; version, model and credits: not reported. Session approximately 19:57–20:05 CET.
+- Prompt summary: implement an opt-in hidden-trigger Judge scenario with strict allowed-file scope, explicit budgets and regression tests.
+- Kiro generated: `src/judge/env.js`, `src/judge/scenario.js`, `src/judge/index.js`, `src/judge/report.js`, `src/cli/index.js`, `test/demo-judge.test.js` and `test/judge.test.js`. The saved partial patch was applied **manually before Kiro completed** the implementation; review, commits and push were manual.
+- Verification: Kiro CLI reported 635/635 tests and 3/3 Docker tests; the task report separately records `npm test` 635 passed, 0 failed/skipped and `JRM_DOCKER_TESTS=1 node --test test/demo-judge.test.js` 3 passed, 0 failed. Independently exercised cached-image Judge: default PASS in 37.2 s (60 s budget), hidden-trigger PASS in 66.3 and 66.5 s (90 s budget); trigger fired once, unsafe plan DENY DATA_LOSS, safe alternative SAFE, 0 rows lost, real run retained 3 orders, undo RECOVERED, 16 receipts and 0 mismatches. `git diff --check` PASS. The 90 s opt-in budget can fail on slower machines; no production targets tested.
+- Commit/PR: original branch head `16fa858`; merged PR #56, squash commit `ddcbb40`.
+- Source: `~/aivaro-tasks/archive/2026-11-21-51-judge-hidden-trigger/report.md`.
