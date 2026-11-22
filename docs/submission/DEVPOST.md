@@ -17,6 +17,8 @@
 - Chaos Twin crashes a disposable database with `SIGKILL` and proves recovery: [test](../../test/demo-chaos.test.js) · [recorded evidence](../evidence/chaos-live-2026-11-20/README.md).
 - Gate probe distinguishes ACTIVE and INACTIVE: [tests](../../test/gate.test.js).
 
+[Every tested scenario with proof](../USE_CASES.md).
+
 ### Category: Frankenstein — why
 
 Kiro's agent workflow, its hook and MCP integration, Docker/PostgreSQL rehearsals, separately authorized execution, signed receipts and verified undo become one connected system. Each part is useful; together they turn an agent's proposed change into **measured impact before execution and auditable recovery afterward**. [Kiro usage evidence](../KIRO_USAGE.md) · [Architecture](../../.kiro/specs/justrunme-zero/design.md).
@@ -39,7 +41,7 @@ npm ci
 node src/cli/index.js judge --hidden-trigger --text
 ```
 
-The judge command creates temporary demo resources, rehearses a destructive change and a safe alternative, runs and undoes the safe plan, verifies the receipt chain and detects tampering. It does not need your own server, production keys or database credentials. In a documented fresh-clone check, the judge took **38.4 seconds on its first run and 37.5 seconds on its second**, with `postgres:16.3-alpine` **already cached both times**; a first Docker image pull was not measured. [Recording runbook](RECORDING_RUNBOOK.md). For a separate local evidence view, run `node src/cli/index.js console` and open the tokenized URL it prints. For an existing mission, `justrunme evidence` reports what its verified receipts prove and what remains unchecked; `justrunme gate-probe` checks whether the agent session is actually gated. Neither command establishes that arbitrary host-side code is safe.
+The judge command creates temporary demo resources, rehearses a destructive change and a safe alternative, runs and undoes the safe plan, verifies the receipt chain and detects tampering. It does not need your own server, production keys or database credentials. The [hidden-trigger repeatability evidence](../evidence/hidden-trigger-runs.md) records **4/4 PASS** (three checkout runs, one fresh clone), **67.0–68.2 s** judge-reported duration against a **90 s** budget, and **16 signed receipts verified / 0 mismatches** per run. [Recording runbook](RECORDING_RUNBOOK.md). For a separate local evidence view, run `node src/cli/index.js console` and open the tokenized URL it prints. For an existing mission, `justrunme evidence` reports what its verified receipts prove and what remains unchecked; `justrunme gate-probe` checks whether the agent session is actually gated.
 
 ## How we built it
 
@@ -59,9 +61,15 @@ We added **LOGIC BYPASS** detection in the rehearsal copy for T25 v2, including 
 - **Recorded Chaos Twin recovery (2026-11-20):** a database-container `SIGKILL` after step 2 was followed by undo **RECOVERED** and verdict **RECOVERY PROVEN**; **21 checks, 0 failed**, signed receipt-chain verification and clean resource cleanup with no leftover containers, volumes or networks. The [public recorded evidence](../evidence/chaos-live-2026-11-20/README.md) includes `chaos.json`, `verify.json`, the signed receipt, public key and a portable receipt/anchor verification command. This was a separate recorded database-only run, **not a live video take** or a sandbox for untrusted shell; health check was not configured.
 
 - A recorded Kiro CLI run caught the hidden trigger's loss of **1 of 3 orders**, rejected a trigger-bypass attempt, and executed a revised plan that matched its rehearsal with all 3 orders retained.
-- **649 tests passed, 0 failed, 0 skipped** in `npm test` on current main `38316068d4fbf225c6ca379cdca6869bcbe49c3f`. The [historical test report](../test-report.json) is retained as a separately dated snapshot.
+- **Hidden-trigger repeatability:** [4/4 PASS](../evidence/hidden-trigger-runs.md), three checkout runs and one fresh clone, **16 signed receipts / 0 mismatches** per run.
+- **730 tests passed, 0 failed, 0 skipped** in `JRM_DOCKER_TESTS=1 npm test` on merged head `59336dac2a1630759d3f294f8f2eb672a1ea0519`. The [historical test report](../test-report.json) is retained as a separately dated snapshot.
 - A reproducible `judge --text` flow exercises rehearsal, denial, safe execution, undo, receipt verification and tamper detection using throwaway resources.
 - The Console makes the recorded decisions and gaps inspectable rather than presenting every step as successful.
+
+## Honest limits
+
+- The first Docker image pull was not measured. In a separate fresh-clone check, the **default `judge --text`**, not `judge --hidden-trigger --text`, took **38.4 s** and **37.5 s**, with `postgres:16.3-alpine` cached both times.
+- Neither `justrunme evidence` nor `justrunme gate-probe` establishes that arbitrary host-side code is safe.
 
 ## What we learned
 
@@ -88,7 +96,7 @@ Sources (internal; remove this section before pasting into Devpost):
 - Pain, 3 -> 2 rows, trigger-bypass refusal, final 3/3 and recorded Kiro configuration: docs/agent-runs/2026-11-20-live2.md; test/live-evidence.test.js
 - Preregistered five-run experiment and limitations: docs/agent-runs/T25-results-v1.md; docs/agent-runs/T25-preregistration.md
 - Separate T25 v2 experiment and bypass detection: docs/agent-runs/T25-results-v2.md; test/demo-bypass.test.js; src/rehearsal/observe.js; src/authorize/authorization.js
-- Current main `38316068d4fbf225c6ca379cdca6869bcbe49c3f`: npm test 649/0/0; historical snapshot: docs/test-report.json
+- Current main `59336dac2a1630759d3f294f8f2eb672a1ea0519`: JRM_DOCKER_TESTS=1 npm test 730/0/0; historical snapshot: docs/test-report.json
 - Judge behavior, evidence/gate-probe self-checks and prerequisites: src/cli/index.js; test/demo-judge.test.js; README.md
 - Rehearsal, approval, recovery, Console and limitations: README.md; src/console/static/; test/console-missions.test.js; test/demo-chaos.test.js
 - Kiro features and evidence: .kiro/specs/justrunme-zero/; .kiro/steering/; .kiro/agents/; .kiro/hooks/; docs/agent-runs/; docs/KIRO_LOG.md
