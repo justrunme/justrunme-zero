@@ -1,4 +1,4 @@
-# JustRunMe — Kiroween video script (2:00)
+# JustRunMe — Kiroween video script (2:15)
 
 **Format:** English voice-over and screen capture. Start on the working product, not installation. Distinguish recorded Kiro sessions from a live judge execution; cut waiting time visibly and never fabricate a result. [Recording runbook](submission/RECORDING_RUNBOOK.md).
 
@@ -12,7 +12,8 @@
 | 1:12–1:28 | Hook denial `rm -rf` and nine MCP tools; label hook transcript recorded. | “The Kiro gate can deny dangerous tool calls with signed receipts. The MCP workflow can request approval but cannot approve itself.” | [Hook test](../test/hook.test.js) · [MCP test](../test/demo-mcp.test.js) |
 | 1:28–1:45 | **RECORDED CHAOS TWIN** evidence, SIGKILL then RECOVERY PROVEN. | “Chaos Twin kills a disposable database mid-run. Undo recovers it; twenty-one recorded checks passed with zero failures.” | [Recorded Chaos evidence](evidence/chaos-live-2026-11-20/README.md) |
 | 1:45–1:55 | Open the **Console Proof chain** with `node src/cli/index.js console --judge-report judge.json` (after saving `node src/cli/index.js judge --hidden-trigger > judge.json`); open its printed `proof_chain_url`. Show all five steps: hidden trigger loses an order (**orders 3 → 2**), dangerous plan **DENIED**, safe plan **0 orders / 0 patches lost**, undo **RECOVERED**, verification **PASS**; overall judge **PASS**. | “One saved judge report tells the whole story: loss detected, danger denied, safe change, recovery, verified.” | [Judge runbook](JUDGE_QUICKSTART.md) · [Committed judge report](../test/fixtures/judge-hidden-trigger-report.json) |
-| 1:55–2:00 | JustRunMe logo over the final Proof chain PASS view. | “JustRunMe. Rehearse. Run. Recover.” | [Judge integration test](../test/demo-judge.test.js) |
+| 1:55–2:10 | **Tamper check on a disposable copy** of `demo/recorded-run`: show `verify` **exit 0**, flip byte 30 in the copied receipt chain, show **exit 30** and named findings, restore original bytes, show **exit 0**. Label **COPY — RECORDED EVIDENCE**, not a live judge run. | “Change just one byte in saved evidence and verification rejects it. Restore that byte and the chain verifies again.” | [Recording runbook](submission/RECORDING_RUNBOOK.md) · [Receipt verifier](../src/receipts/chain.js) |
+| 2:10–2:15 | JustRunMe logo over the final Proof chain PASS view. | “JustRunMe. Rehearse. Run. Recover.” | [Judge integration test](../test/demo-judge.test.js) |
 
 ## Recording setup
 

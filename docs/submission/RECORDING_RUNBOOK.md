@@ -21,7 +21,45 @@ Verified on a fresh `origin/main` clone at **`0ea290b97be9bc199fa802f61bd0f6043a
 | 1:12–1:28 | `docs/agent-runs/2026-11-20-live1.md`, `.kiro/hooks/pretooluse.json`, `test/demo-mcp.test.js` | Not yet dry-run | Show recorded `rm -rf` denial and nine MCP tools; label hook transcript **RECORDED** |
 | 1:28–1:45 | `docs/evidence/chaos-live-2026-11-20/README.md` | Not yet dry-run | Show **RECORDED CHAOS TWIN** evidence: SIGKILL, recovery proven, 21 checks passed |
 | 1:45–1:55 | Printed `proof_chain_url` (`#/proof`) from `console --port 8765 --judge-report judge.json` | Not yet dry-run | Show five steps: hidden-trigger orders **3 → 2**, dangerous plan **DENIED**, safe plan **0 orders / 0 patches lost**, undo **RECOVERED**, verification **PASS**; show overall judge **PASS** badge |
-| 1:55–2:00 | `#/proof` (same authenticated tab) | Not yet dry-run | JustRunMe logo over the final Proof chain PASS view; “Rehearse. Run. Recover.” |
+| 1:55–2:10 | Terminal: throwaway recorded-run copy, `verify --repo <copy> --mission mission-t25v2-a` | Not yet dry-run (footage) | Show CLEAN exit **0**, byte-30 TAMPERED exit **30** with three named findings, RESTORED exit **0**; label **COPY — RECORDED EVIDENCE** |
+| 2:10–2:15 | `#/proof` (same authenticated tab) | Not yet dry-run | JustRunMe logo over the final Proof chain PASS view; “Rehearse. Run. Recover.” |
+
+## Tamper-check terminal shot (1:55–2:10)
+
+Run from the repository root, using a **throwaway copy only**. Never modify `demo/recorded-run/` itself. The anchor destination must be calculated from the copy's real path, not the original repository path. This is the same recorded-export layout used by `src/console/recorded.js`:
+
+```js
+// Run with: node --input-type=module < tamper-shot.mjs (or paste into a Node heredoc)
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import os from 'node:os'
+import path from 'node:path'
+import { anchorPath } from './src/receipts/chain.js'
+const root = mkdtempSync(path.join(os.tmpdir(), 'jrm-tamper-demo-'))
+const repoDir = path.join(root, 'recorded-run')
+const home = path.join(root, 'home')
+const sourceRoot = process.cwd()
+cpSync(path.join(sourceRoot, 'demo/recorded-run'), repoDir, { recursive: true })
+mkdirSync(path.join(home, 'heads'), { recursive: true })
+copyFileSync(path.join(repoDir, 'operator.pub'), path.join(home, 'operator.pub'))
+for (const mission of JSON.parse(readFileSync(path.join(repoDir, 'manifest.json'), 'utf8')).missions) {
+  copyFileSync(path.join(repoDir, 'anchors', `${mission}.json`), anchorPath(home, mission, repoDir))
+}
+const missionId = 'mission-t25v2-a'
+const chainFile = path.join(repoDir, '.justrunme/missions', missionId, 'receipts.jsonl')
+const verify = () => spawnSync(process.execPath, [path.join(sourceRoot, 'src/cli/index.js'), 'verify', '--repo', repoDir, '--mission', missionId], { env: { ...process.env, JUSTRUNME_HOME: home }, encoding: 'utf8' })
+const show = (name, result) => { console.log(`${name} exit ${result.status}`); process.stdout.write(result.stdout) }
+show('CLEAN', verify())
+const original = readFileSync(chainFile)
+const changed = Buffer.from(original)
+changed[30] = changed[30] ^ 1
+writeFileSync(chainFile, changed)
+show('TAMPERED', verify())
+writeFileSync(chainFile, original)
+show('RESTORED', verify())
+```
+
+For manual terminal verification, the equivalent command is `JUSTRUNME_HOME=<throwaway-home> node src/cli/index.js verify --repo <throwaway-copy> --mission mission-t25v2-a`. The script was executed on the copy: CLEAN **exit 0** (`ok: true`, eight receipts); TAMPERED **exit 30**, `chain_findings` of `seq: 0 / receipt belongs to another mission`, `seq: 0 / signature does not verify`, and `seq: 1 / previous-hash link is broken`; RESTORED **exit 0** (`ok: true`, eight receipts). The byte at offset 30 is intentionally unchanged from `corruptChain()`; do not edit another offset. The recording shot itself is **Not yet dry-run**. Keep the temporary home and copy together; delete only this throwaway directory when finished.
 
 ## Script mismatches / production cautions
 
