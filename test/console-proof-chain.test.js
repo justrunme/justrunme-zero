@@ -202,6 +202,43 @@ describe('Console Proof chain: a missing field is unavailable and never green', 
   })
 })
 
+describe('Console Proof chain: expandable steps', () => {
+  it('each step starts collapsed and its button expands the facts, which equal the report fields', () => {
+    const view = screen(REPORT)
+    const d = HT.dangerous
+    const lost = d.orders_before - d.orders_after
+    const expected = {
+      loss: [lost === 1 ? 'an order lost' : `${lost} orders lost`, `verdict ${d.verdict}`, `trigger ${d.trigger_fired.trigger}`],
+      safe: [`verdict ${HT.safe.verdict}`, `recommended ${HT.selection.recommended}`],
+      recovered: [`recovery verification ${HT.undo.verification}`],
+      verified: [`judge ${REPORT.judge.status}`],
+    }
+    for (const s of mod.proofChain(REPORT)) {
+      const row = rowOf(view, s.key)
+      const btn = findAll(row, (e) => e.tag === 'button')[0]
+      assert.equal(btn.getAttribute('aria-expanded'), 'false', `${s.key} collapsed`)
+      assert.ok(!hasClass(row, 'open'))
+      btn.listeners.click[0]()
+      assert.equal(btn.getAttribute('aria-expanded'), 'true')
+      assert.ok(hasClass(row, 'open') && hasClass(row, s.tone), `${s.key} open keeps its tone`)
+      const detail = findAll(row, (e) => hasClass(e, 'pc-detail'))[0]
+      assert.equal(detail.getAttribute('id'), btn.getAttribute('aria-controls'))
+      for (const f of expected[s.key] ?? s.facts) assert.ok(text(detail).includes(f), `${s.key}: ${f}`)
+      btn.listeners.click[0]()
+      assert.ok(!hasClass(row, 'open') && hasClass(row, s.tone))
+    }
+  })
+
+  it('an unavailable step expands to no facts and stays not green', () => {
+    const r = without(REPORT, 'story.hidden_trigger.undo')
+    const row = rowOf(screen(r), 'recovered')
+    findAll(row, (e) => e.tag === 'button')[0].listeners.click[0]()
+    assert.ok(hasClass(row, 'open') && !hasClass(row, 'ok'))
+    assert.equal(findAll(row, (e) => hasClass(e, 'pc-fact')).length, 0)
+    assert.ok(text(row).includes(UNAVAILABLE()))
+  })
+})
+
 describe('Console Proof chain: red', () => {
   const STEP_OF = { hidden_rehearse_dangerous: 'loss', hidden_deny: 'denied', hidden_rehearse_safe: 'safe', hidden_compare: 'safe', hidden_undo: 'recovered', verify: 'verified', offline_verify: 'verified' }
   for (const [id, key] of Object.entries(STEP_OF)) {

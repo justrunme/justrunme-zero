@@ -95,16 +95,35 @@ export function proofChain(report) {
 const ICON = { ok: 'check', bad: 'cross', mute: 'dash' }
 const STATUS_TONE = { passed: 'ok', failed: 'bad' }
 
+/** One step: a header button (number, icon, status, value) that expands the facts below it. */
+function stepView(s, i) {
+  const li = h('li', { class: `pc-step ${s.tone}`, 'data-step': s.key })
+  const detailId = `pc-detail-${s.key}`
+  const toggle = h('button', {
+    type: 'button',
+    class: 'pc-head-row',
+    'aria-expanded': 'false',
+    'aria-controls': detailId,
+    onClick: () => {
+      const open = toggle.getAttribute('aria-expanded') !== 'true'
+      toggle.setAttribute('aria-expanded', String(open))
+      li.className = `pc-step ${s.tone}${open ? ' open' : ''}`
+    },
+  },
+  h('span', { class: 'pc-n', text: String(i + 1) }),
+  h('span', { class: 'pc-ico' }, icon(ICON[s.tone] ?? 'dash')),
+  h('span', { class: 'pc-label', text: s.label }),
+  h('span', { class: 'pc-value', text: s.value }),
+  h('span', { class: 'pc-chev', 'aria-hidden': 'true' }))
+  li.append(toggle,
+    h('div', { class: 'pc-detail', id: detailId },
+      ...s.facts.map((f) => h('span', { class: 'pc-fact', text: f })),
+      ...s.judged.map((j) => h('span', { class: `pc-judge ${STATUS_TONE[j.status] ?? 'mute'}`, 'data-judge': j.id, text: `${j.id}: ${j.status}` }))))
+  return li
+}
+
 function stepsView(steps) {
-  return h('ol', { class: 'pc-steps', 'aria-label': 'Proof chain' }, steps.map((s, i) =>
-    h('li', { class: `pc-step ${s.tone}`, 'data-step': s.key },
-      h('span', { class: 'pc-n', text: String(i + 1) }),
-      h('span', { class: 'pc-ico' }, icon(ICON[s.tone] ?? 'dash')),
-      h('span', { class: 'pc-label', text: s.label }),
-      h('span', { class: 'pc-value', text: s.value }),
-      h('span', { class: 'pc-detail' },
-        ...s.facts.map((f) => h('span', { class: 'pc-fact', text: f })),
-        ...s.judged.map((j) => h('span', { class: `pc-judge ${STATUS_TONE[j.status] ?? 'mute'}`, 'data-judge': j.id, text: `${j.id}: ${j.status}` }))))))
+  return h('ol', { class: 'pc-steps', 'aria-label': 'Proof chain' }, steps.map(stepView))
 }
 
 /**
