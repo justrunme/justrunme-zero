@@ -1216,3 +1216,43 @@ Run 38, Round 1 review correction (2026-11-21): Kiro CLI invoked from repo root 
 - Exact command from repo root: `kiro-cli chat --no-interactive --trust-workspace --v3 --agent justrunme-builder 'reply OK only'`.
 - Exit code 0. Stdout began `OK` immediately followed by `Session-end check:` and a checklist stating no files were modified, no git operations were performed, and tests were not run. Stderr: `[INFO] [KRS] <-- GenerateAssistantResponseCommand done totalEvents=5`. This is **not** an exact-`OK`-only response.
 - Kiro generated no code or documents in this check; the current documentation edits were made manually. Agent selection working does not prove that tool permissions or filesystem restrictions are enforced.
+
+## Run 41 — Docker platform mismatch preflight (2026-11-21, Europe/Berlin)
+- Task: `2026-11-21-43-preflight-platform-mismatch.md`; branch `fix/preflight-platform`; spec task IDs: none (judge preflight hardening).
+- Kiro CLI: 3.5.0; model and credits: not reported.
+- Prompt summary: detect `DOCKER_DEFAULT_PLATFORM` mismatch or malformed platform before creating resources; preserve unset behavior; add regression tests.
+- Kiro generated: `src/judge/preflight.js` and `test/judge-preflight.test.js`. First attempt was blocked by write permission, second produced an unwired checker, third integrated it into `checkDockerDaemon` and tested `createBackend`.
+- Manual adjustments: no manual code edits; review, tests, commits and push were outside Kiro.
+- Verification: `node --test test/judge-preflight.test.js` 14/14 PASS; `npm test` 603/603 PASS on Mac Node 26.13.1; mismatched platform judge exit 41, unset platform exit 0; `git diff --check` PASS. Original report recorded Node 24 CI pending.
+- Commit/PR: original branch head `32b21d9`; merged PR #48, squash commit `49e94f0`.
+- Source: `~/aivaro-tasks/archive/2026-11-21-43-preflight-platform-mismatch/report.md`.
+
+## Run 42 — Measured Judge text output (2026-11-21, Europe/Berlin)
+- Task: `2026-11-21-44-judge-text-numbers.md`; branch `feat/judge-text-numbers`; spec task IDs: none (CLI output improvement).
+- Kiro CLI: 3.5.0; model and credits: not reported.
+- Prompt summary: show measured verdict, rows lost and removed selection plans in `judge --text` using existing story data; preserve JSON and exit behavior; test failed and absent-data paths.
+- Kiro generated: `src/cli/index.js` and `test/judge.test.js`. Its terminal tool call was denied in that session; Kiro ran no tests.
+- Manual adjustments: test helper changed to use `JUDGE_FAILED` exit on FAIL instead of zero; review, tests, commits and push outside Kiro.
+- Verification: targeted tests 22/22 PASS; `npm test` 607/607 PASS, 0 skipped on Node 26.13.1; baseline real judge PASS 40.5 s, changed real judge PASS 34.9 s; `git diff --check` PASS. Removed count refers to plans excluded from selection, not database constraints.
+- Commit/PR: original head `6b6e466`; merged PR #49, squash commit `8f20267`.
+- Source: `~/aivaro-tasks/archive/2026-11-21-44-judge-text-numbers/report.md`.
+
+## Run 43 — Fail-closed execution output cap (2026-11-21, Europe/Berlin)
+- Task: `2026-11-21-48-exec-output-cap.md`; branch `fix/exec-output-cap`; spec task IDs: none (targeted security hardening).
+- Kiro CLI: 3.5.0 without `--agent`; model and credits: not reported.
+- Prompt summary: implement default 8 MiB combined stdout/stderr cap with fail-closed overflow and regression tests, following steering/spec where accessible; no Kiro commit/push/tests.
+- Kiro generated: `src/util/exec.js` and `test/exec-output-cap.test.js`. Kiro reported it could not read steering/spec due to tool permission denial and could not find the external task file; it ran no tests.
+- Manual adjustments: reject invalid `maxOutputBytes`, cap spawn-error buffering, ensure overflow exits nonzero, add invalid-limit regression test; review, tests, commits and push outside Kiro.
+- Verification: targeted 10/10 PASS; Node 24.22.3 full `npm test` 617 PASS, 0 failed, 0 skipped; `git diff --check` PASS.
+- Round 1: Kiro additionally authored `src/rehearsal/compose.js` (named 1 GiB pg_dump and 64 MiB Docker log caps, fail closed on overflow) and `test/compose-output-cap.test.js` (four regression tests). Manual review, commit and PR update; Node 24.22.3 full `npm test` 621 PASS, 0 failed, 0 skipped. Remaining risk: large raw psql, git binary diffs and judge JSON may hit the default cap; `runSync()` retains its separate 64 MiB buffer.
+- Commit/PR: original head `0958e4f`, Round 1 head `1fd6f4a`; merged PR #53, squash commit `8432446`.
+- Source: `~/aivaro-tasks/archive/2026-11-21-48-exec-output-cap/report.md`.
+
+## Run 44 — Verified Judge cleanup status (2026-11-21, Europe/Berlin)
+- Task: `2026-11-21-49-judge-cleanup-status.md`; branch `fix/judge-cleanup-status`; spec task IDs: none.
+- Kiro CLI: without `--agent`, with `--trust-all-tools`; version, model and credits: not reported in the archived report.
+- Prompt summary: integrate saved partial cleanup patch; fail closed on unverified or leftover resources; add injected Docker and signal tests; limit changes to Judge environment, index, report and tests.
+- Kiro generated in Round 2: `src/judge/env.js`, `src/judge/index.js`, `src/judge/report.js`, `test/cleanup.test.js`, `test/judge.test.js`. Cleanup reports clean/leftovers/unverified; incomplete cleanup prevents PASS. No manual code edits reported; review, commit, push and PR creation were manual.
+- Verification: Kiro reported 41/41 focused tests PASS and real Judge PASS with verified clean cleanup (41.3 s); independent Node 24.22.3 `npm test` 623 PASS, 0 failed, 0 skipped; `git diff --check` PASS. Docker failure paths used injected runner, success used real Docker. Original report recorded Node 24 CI pending.
+- Commit/PR: Round 2 head `6b4d29f`; merged PR #54, squash commit `4f863cc`.
+- Source: `~/aivaro-tasks/archive/2026-11-21-49-judge-cleanup-status/report.md`.
