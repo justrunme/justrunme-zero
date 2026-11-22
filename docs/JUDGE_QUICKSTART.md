@@ -67,7 +67,7 @@ The step report confirmed a destructive rehearsal denied, a safe alternative reh
 receipts verified: 8, mismatches: 0, policy violations: 0
 ```
 
-For the Console, use `node src/cli/index.js console --port 47891` (or omit `--port` for its default). Open the localhost URL printed in its JSON output, including its **private token fragment**. This check verified the HTML HTTP response and title, **not** a full interactive browser walkthrough. Stop it with Ctrl-C when finished.
+For the Console, use `node src/cli/index.js console --port 47891` (or omit `--port` for its default). Open the localhost URL printed in its JSON output, including its **private token fragment**. This check verified the HTML HTTP response and title, **not** a full interactive browser walkthrough. Stop it with Ctrl-C when finished. The **Proof chain** screen shows the hidden-trigger story as five steps from a saved judge run: `node src/cli/index.js judge --hidden-trigger > judge.json`, then `node src/cli/index.js console --judge-report judge.json` and open the `proof_chain_url` it prints.
 
 ## Troubleshooting and gaps found
 
