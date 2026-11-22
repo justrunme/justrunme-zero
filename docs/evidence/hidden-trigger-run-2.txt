@@ -1,0 +1,32 @@
+judge: ok (exit 0)
+PASS in 67.7 s (budget 90 s, enforced)
+  dangerous plan: DATA LOSS, rows lost: 1 (orders 1, patches 0)
+  safe plan: SAFE, rows lost: 0 (orders 0, patches 0)
+  removed from selection: 1 plan
+  hidden trigger patches_release_sold_out: DATA LOSS, orders 3 -> 2
+  hidden trigger safe alternative: SAFE, rows lost: 0 (orders 0, patches 0)
+  ok   Create a throwaway operator key (0.1 s)
+  ok   Create a throwaway approver key (the demo approves with it by itself; a real approval is a person typing a passphrase) (0.3 s)
+  ok   Rehearse the dangerous plan on a disposable copy (11.0 s)
+  ok   Authorization of the dangerous plan is denied (1.0 s)
+  ok   Rehearse the safe alternative on the same base (10.2 s)
+  ok   Compare both rehearsals; the safe plan is recommended (0.1 s)
+  ok   Authorize the selected safe plan (1.0 s)
+  ok   Run the safe plan on the real database (2.6 s)
+  ok   Undo the run and verify the recovery (2.5 s)
+  ok   Rehearse an innocent-looking UPDATE whose hidden trigger deletes orders (11.3 s)
+  ok   Authorization of the hidden-trigger plan is denied (1.1 s)
+  ok   Rehearse the safe alternative (cancel the open orders, then update) (10.6 s)
+  ok   Compare both rehearsals; the safe alternative is recommended (0.2 s)
+  ok   Authorize the selected safe alternative (1.1 s)
+  ok   Run the safe alternative on the real database (2.7 s)
+  ok   Undo the run and verify the recovery (2.4 s)
+  ok   Verify the receipt chain, policy and selection (0.2 s)
+  ok   Replay the recorded selection (0.1 s)
+  ok   Verify again with the containers gone and no Docker on the path (0.1 s)
+  ok   A one-byte change to the chain is detected (0.1 s)
+  ok   Putting the byte back makes the chain verify again (0.1 s)
+receipts verified: 16, mismatches: 0, policy violations: 0
+real 67.78
+user 12.24
+sys 6.77

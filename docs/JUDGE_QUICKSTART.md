@@ -57,6 +57,8 @@ The `--text` flag prints the hidden-trigger verdict and order counts as readable
 
 These are checked in the [Docker integration test](../test/demo-judge.test.js) against the [scenario result](../src/judge/scenario.js); the [recorded agent run](agent-runs/2026-11-20-live2.md) provides additional execution context. The full JSON fields include `result.story.hidden_trigger.trigger`, `.dangerous`, `.denied`, `.safe`, `.run` and `.undo`.
 
+**Why the safe plan is correct.** The alternative first cancels the open orders of patch 1 (`SELECT cancel_patch_orders(1)`), then runs the same `UPDATE patches SET available_count = 0 WHERE id = 1`. The trigger deletes only rows whose status is `open`, so after the cancellation it finds nothing to delete. The [real-Postgres test](../test/demo-safe-plan-semantics.test.js) reads the exact rows, not counts: after the run orders 1, 2 and 3 all still exist with the same `patch_id`, `quantity` and `created_at` as the seed; order 2 (patch 1, quantity 5) is `cancelled`, the one reclassification the plan states, and orders 1 and 3 stay `open`; patch 1 has `available_count` 0 and the other four patch rows are unchanged. After `undo`, every order and patch field equals the seed again, with order 2 back to `open`.
+
 This is **opt-in** because the full run performs four rehearsals (two default and two hidden-trigger), rather than the default two. The [report contract](../src/judge/report.js) sets a separate **90-second** budget for `--hidden-trigger`, versus **60 seconds** for default judge. When the budget is enforced (images already cached), exceeding it produces **`FAIL`** with an **`OVER_BUDGET`** finding. First-time image downloads are timed but exempt from budget enforcement, as the report states.
 
 The step report confirmed a destructive rehearsal denied, a safe alternative rehearsed and authorized, the real run, undo and recovery verification, offline receipt verification, and tamper detection. It ended with:
@@ -83,3 +85,5 @@ For the Console, use `node src/cli/index.js console --port 47891` (or omit `--po
 - Both temporary fresh clones (`/tmp/jrm-judge-refresh-87xMgm` at `de25622`, `/tmp/jrm-review30-dCvEGN` at `0ea290b`) were left in place for reproducibility; it is **not** a running container or service.
 
 No Kiro CLI credits were used for this documentation/verification task; no entry was added to `docs/KIRO_LOG.md`.
+
+Explore the [tested JustRunMe use cases and their reproduction commands](USE_CASES.md).
