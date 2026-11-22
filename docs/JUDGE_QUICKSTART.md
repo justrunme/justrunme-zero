@@ -83,3 +83,5 @@ For the Console, use `node src/cli/index.js console --port 47891` (or omit `--po
 - Both temporary fresh clones (`/tmp/jrm-judge-refresh-87xMgm` at `de25622`, `/tmp/jrm-review30-dCvEGN` at `0ea290b`) were left in place for reproducibility; it is **not** a running container or service.
 
 No Kiro CLI credits were used for this documentation/verification task; no entry was added to `docs/KIRO_LOG.md`.
+
+Explore the [tested JustRunMe use cases and their reproduction commands](USE_CASES.md).
