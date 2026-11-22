@@ -3,7 +3,25 @@
 **Primary category to select on Devpost: Frankenstein** — the Kiro workflow, MCP, CLI, PostgreSQL/Docker rehearsals, receipts, and Console are combined into one entry. This is the intended category, **not a claim that the form has been submitted**. [Submission checklist](CHECKLIST.md).
 
 ## Elevator pitch
-An agent's migration quietly deletes orders. JustRunMe catches the loss in a disposable rehearsal, blocks the run, and verifies a safer result. Rehearse. Run. Recover.
+
+**Your AI agent thinks the database change is safe. JustRunMe proves whether it is.** A hidden PostgreSQL trigger silently deletes a customer order. JustRunMe catches the loss before the real run, blocks the dangerous change, executes a verified safe alternative, and proves recovery with signed evidence. **Rehearse. Run. Recover.**
+
+**The demo to watch:** `node src/cli/index.js judge --hidden-trigger --text` — real PostgreSQL in Docker, orders **3 → 2**, **DENY DATA_LOSS**, then **SAFE (0 orders lost)**, a matching real run and **RECOVERED** undo. [Reproduce it](../JUDGE_QUICKSTART.md) · [Docker integration proof](../../test/demo-judge.test.js).
+
+### Not just the database
+
+- Disposable Git worktree rehearsal of workspace changes: [implementation](../../src/rehearsal/workspace.js).
+- Undo of captured PostgreSQL data/schema/grants, allowed workspace files and contract configuration; recovery checks include rows, checksums, files, images and configured health: [grants test](../../test/demo-undo-grants.test.js) · [recovery test](../../test/demo-chaos.test.js).
+- Opt-in Kiro `PreToolUse` gate blocks dangerous shell and protected-file changes, with signed decisions: [hook tests](../../test/hook.test.js).
+- Nine MCP tools for the agent workflow, with no approval tool: [tool contract](../../test/hook.test.js) · [MCP test](../../test/demo-mcp.test.js).
+- Chaos Twin crashes a disposable database with `SIGKILL` and proves recovery: [test](../../test/demo-chaos.test.js) · [recorded evidence](../evidence/chaos-live-2026-11-20/README.md).
+- Gate probe distinguishes ACTIVE and INACTIVE: [tests](../../test/gate.test.js).
+
+[Every tested scenario with proof](../USE_CASES.md).
+
+### Category: Frankenstein — why
+
+Kiro's agent workflow, its hook and MCP integration, Docker/PostgreSQL rehearsals, separately authorized execution, signed receipts and verified undo become one connected system. Each part is useful; together they turn an agent's proposed change into **measured impact before execution and auditable recovery afterward**. [Kiro usage evidence](../KIRO_USAGE.md) · [Architecture](../../.kiro/specs/justrunme-zero/design.md).
 
 ## Inspiration
 An agent can read a SQL migration, find no obvious `DELETE`, and approve it. But a trigger that lives only in the database can delete orders anyway. In a recorded Kiro-agent run, a migration that looked safe actually reduced `orders` from **3 rows to 2**. JustRunMe measured the loss before the real change and denied that plan. The agent revised its approach; the accepted run kept all 3 orders. [Evidence: recorded live run](../agent-runs/2026-11-20-live2.md).
@@ -20,10 +38,10 @@ A local Console shows the mission's Flight Recorder, impact differences, approva
 
 ```sh
 npm ci
-node src/cli/index.js judge --text
+node src/cli/index.js judge --hidden-trigger --text
 ```
 
-The judge command creates temporary demo resources, rehearses a destructive change and a safe alternative, runs and undoes the safe plan, verifies the receipt chain and detects tampering. It does not need your own server, production keys or database credentials. In a documented fresh-clone check, the judge took **38.4 seconds on its first run and 37.5 seconds on its second**, with `postgres:16.3-alpine` **already cached both times**; a first Docker image pull was not measured. [Recording runbook](RECORDING_RUNBOOK.md). For a separate local evidence view, run `node src/cli/index.js console` and open the tokenized URL it prints. For an existing mission, `justrunme evidence` reports what its verified receipts prove and what remains unchecked; `justrunme gate-probe` checks whether the agent session is actually gated. Neither command establishes that arbitrary host-side code is safe.
+The judge command creates temporary demo resources, rehearses a destructive change and a safe alternative, runs and undoes the safe plan, verifies the receipt chain and detects tampering. It does not need your own server, production keys or database credentials. The [hidden-trigger repeatability evidence](../evidence/hidden-trigger-runs.md) records **4/4 PASS** (three checkout runs, one fresh clone), **67.0–68.2 s** judge-reported duration against a **90 s** budget, and **16 signed receipts verified / 0 mismatches** per run. [Recording runbook](RECORDING_RUNBOOK.md). For a separate local evidence view, run `node src/cli/index.js console` and open the tokenized URL it prints. For an existing mission, `justrunme evidence` reports what its verified receipts prove and what remains unchecked; `justrunme gate-probe` checks whether the agent session is actually gated.
 
 ## How we built it
 
@@ -43,9 +61,15 @@ We added **LOGIC BYPASS** detection in the rehearsal copy for T25 v2, including 
 - **Recorded Chaos Twin recovery (2026-11-20):** a database-container `SIGKILL` after step 2 was followed by undo **RECOVERED** and verdict **RECOVERY PROVEN**; **21 checks, 0 failed**, signed receipt-chain verification and clean resource cleanup with no leftover containers, volumes or networks. The [public recorded evidence](../evidence/chaos-live-2026-11-20/README.md) includes `chaos.json`, `verify.json`, the signed receipt, public key and a portable receipt/anchor verification command. This was a separate recorded database-only run, **not a live video take** or a sandbox for untrusted shell; health check was not configured.
 
 - A recorded Kiro CLI run caught the hidden trigger's loss of **1 of 3 orders**, rejected a trigger-bypass attempt, and executed a revised plan that matched its rehearsal with all 3 orders retained.
-- A clean-tree test report records **571 passed, 0 failed, 0 skipped** on Node.js 24.22.3 at the documented commit. This is a point-in-time result, not a claim about every machine or future commit.
+- **Hidden-trigger repeatability:** [4/4 PASS](../evidence/hidden-trigger-runs.md), three checkout runs and one fresh clone, **16 signed receipts / 0 mismatches** per run.
+- **730 tests passed, 0 failed, 0 skipped** in `JRM_DOCKER_TESTS=1 npm test` on merged head `59336dac2a1630759d3f294f8f2eb672a1ea0519`. The [historical test report](../test-report.json) is retained as a separately dated snapshot.
 - A reproducible `judge --text` flow exercises rehearsal, denial, safe execution, undo, receipt verification and tamper detection using throwaway resources.
 - The Console makes the recorded decisions and gaps inspectable rather than presenting every step as successful.
+
+## Honest limits
+
+- The first Docker image pull was not measured. In a separate fresh-clone check, the **default `judge --text`**, not `judge --hidden-trigger --text`, took **38.4 s** and **37.5 s**, with `postgres:16.3-alpine` cached both times.
+- Neither `justrunme evidence` nor `justrunme gate-probe` establishes that arbitrary host-side code is safe.
 
 ## What we learned
 
@@ -53,7 +77,7 @@ Outcome checks are necessary but not sufficient: a plan can leave the database l
 
 ## What's next
 
-Extend bypass detection to untested PostgreSQL mechanisms such as event triggers, RLS policies, extension functions and role/database settings, reduce exposure of production data inside rehearsals, expand recovery and environment testing, and improve the judge onboarding path. This is a research/demo implementation: **do not rely on it to protect real production data yet**.
+Extend bypass detection to untested PostgreSQL mechanisms such as event triggers, RLS policies, extension functions and role/database settings, reduce exposure of production data inside rehearsals, expand recovery and environment testing, and improve the judge onboarding path. See [Honest limits](../../README.md#honest-limits) for the scope of verified behavior.
 
 ## Built with
 
@@ -72,7 +96,7 @@ Sources (internal; remove this section before pasting into Devpost):
 - Pain, 3 -> 2 rows, trigger-bypass refusal, final 3/3 and recorded Kiro configuration: docs/agent-runs/2026-11-20-live2.md; test/live-evidence.test.js
 - Preregistered five-run experiment and limitations: docs/agent-runs/T25-results-v1.md; docs/agent-runs/T25-preregistration.md
 - Separate T25 v2 experiment and bypass detection: docs/agent-runs/T25-results-v2.md; test/demo-bypass.test.js; src/rehearsal/observe.js; src/authorize/authorization.js
-- Point-in-time 571/0/0 test result and exact commit: docs/test-report.json
+- Merged branch head `59336dac2a1630759d3f294f8f2eb672a1ea0519`: JRM_DOCKER_TESTS=1 npm test 730/0/0; historical snapshot: docs/test-report.json
 - Judge behavior, evidence/gate-probe self-checks and prerequisites: src/cli/index.js; test/demo-judge.test.js; README.md
 - Rehearsal, approval, recovery, Console and limitations: README.md; src/console/static/; test/console-missions.test.js; test/demo-chaos.test.js
 - Kiro features and evidence: .kiro/specs/justrunme-zero/; .kiro/steering/; .kiro/agents/; .kiro/hooks/; docs/agent-runs/; docs/KIRO_LOG.md
