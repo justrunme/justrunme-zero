@@ -73,7 +73,7 @@ The judge command uses throwaway demo resources: it rehearses a destructive plan
 
 | Capability | Evidence |
 | --- | --- |
-| Full automated suite: **730 passed, 0 failed, 0 skipped** on current main | `JRM_DOCKER_TESTS=1 npm test` on merged head `59336dac2a1630759d3f294f8f2eb672a1ea0519` (this run); [historical report](docs/test-report.json) at `8f20267` |
+| Full automated suite: **730 passed, 0 failed, 0 skipped** on merged branch head | `JRM_DOCKER_TESTS=1 npm test` on merged head `59336dac2a1630759d3f294f8f2eb672a1ea0519` (this run); [historical report](docs/test-report.json) at `8f20267` |
 | Disposable rehearsal, approval, run and verified undo | [Demo integration tests](test/demo-judge.test.js) and [judge implementation](src/cli/index.js) |
 | Real Kiro agent workflow and recorded limits | [Live session 1](docs/agent-runs/2026-11-20-live1.md), [live session 2](docs/agent-runs/2026-11-20-live2.md) |
 | Hidden trigger experiment, including failed approaches | [T25 results](docs/agent-runs/T25-results-v1.md) |

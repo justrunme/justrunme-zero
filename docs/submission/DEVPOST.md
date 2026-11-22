@@ -96,7 +96,7 @@ Sources (internal; remove this section before pasting into Devpost):
 - Pain, 3 -> 2 rows, trigger-bypass refusal, final 3/3 and recorded Kiro configuration: docs/agent-runs/2026-11-20-live2.md; test/live-evidence.test.js
 - Preregistered five-run experiment and limitations: docs/agent-runs/T25-results-v1.md; docs/agent-runs/T25-preregistration.md
 - Separate T25 v2 experiment and bypass detection: docs/agent-runs/T25-results-v2.md; test/demo-bypass.test.js; src/rehearsal/observe.js; src/authorize/authorization.js
-- Current main `59336dac2a1630759d3f294f8f2eb672a1ea0519`: JRM_DOCKER_TESTS=1 npm test 730/0/0; historical snapshot: docs/test-report.json
+- Merged branch head `59336dac2a1630759d3f294f8f2eb672a1ea0519`: JRM_DOCKER_TESTS=1 npm test 730/0/0; historical snapshot: docs/test-report.json
 - Judge behavior, evidence/gate-probe self-checks and prerequisites: src/cli/index.js; test/demo-judge.test.js; README.md
 - Rehearsal, approval, recovery, Console and limitations: README.md; src/console/static/; test/console-missions.test.js; test/demo-chaos.test.js
 - Kiro features and evidence: .kiro/specs/justrunme-zero/; .kiro/steering/; .kiro/agents/; .kiro/hooks/; docs/agent-runs/; docs/KIRO_LOG.md
