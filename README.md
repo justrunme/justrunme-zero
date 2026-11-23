@@ -26,7 +26,7 @@ For the shorter standard judge run: `node src/cli/index.js judge --text`. Both u
 
 ## Proof you can check
 
-- **Judge quickstart:** [`npm ci` and `node src/cli/index.js judge --text`](docs/JUDGE_QUICKSTART.md) — a recorded fresh-clone judge run passed in **37.4 s** at `de256225`; the later `npm ci` + full-suite check at `0ea290b` was a separate run. Docker image was cached.
+- **Judge quickstart:** Fresh-clone check at `6ccfdf3` (23 November 2026): `node src/cli/index.js judge --text` **PASS in 42.1 s**, full `npm test` **708/708 passed**; Docker image cached. [Reproduce the judge run](docs/JUDGE_QUICKSTART.md).
 - **Gate decisions:** [13 of 13 destructive actions denied, 1 harmless read allowed](docs/EXAMPLES.md) with the gate enabled.
 - **Recorded Chaos Twin recovery:** [RECOVERY PROVEN, 21 checks, 0 failed](docs/evidence/chaos-live-2026-11-20/README.md) after a database `SIGKILL`, with a signed receipt and public key. Run the **portable receipt/anchor verification command** in that README.
 - **Hidden-trigger repeatability:** [4/4 PASS runs](docs/evidence/hidden-trigger-runs.md) (three in a checkout, one fresh clone), **16 signed receipts / 0 mismatches each**, with real PostgreSQL in Docker.
