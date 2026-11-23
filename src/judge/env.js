@@ -336,6 +336,11 @@ export async function createBackend({ env = process.env, probe = run, nodeVersio
           })
         )
       },
+      async readOrderTwoStatus() {
+        const result = await psql(real, { sql: 'SELECT status FROM public.orders WHERE id = 2' })
+        if (result.code !== 0) throw new JudgeEnvironmentError('MEASUREMENT_FAILED', 'Could not read order #2 on the demo target')
+        return result.stdout.trim() || null
+      },
       async installHiddenTrigger() {
         const r = await psql(real, { sql: HIDDEN_TRIGGER_SQL })
         if (r.code !== 0) throw new JudgeEnvironmentError('SEED_FAILED', `installing the hidden trigger failed: ${r.stderr.trim().split('\n').slice(-1)[0]}`)

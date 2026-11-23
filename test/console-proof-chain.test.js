@@ -146,6 +146,16 @@ describe('Console Proof chain: values', () => {
     assert.deepEqual(steps.map((s) => s.tone), ['ok', 'ok', 'ok', 'ok', 'ok'])
   })
 
+  it('distinguishes lost rows on the copy from the denied target run and requires observed cancellation', () => {
+    const report = clone(REPORT)
+    assert.match(text(screen(report)), /Rehearsal copy.*Target database.*blocked before execution/)
+    assert.match(text(screen(report)), /Order #2 status unavailable/)
+    report.story.hidden_trigger.run.order_2_status = 'cancelled'
+    assert.match(text(screen(report)), /Order #2 · cancelled, not deleted/)
+    report.steps.find((s) => s.id === 'hidden_run').status = 'failed'
+    assert.match(text(screen(report)), /Order #2 status unavailable/)
+  })
+
   it('renders every step on screen with the same text and tone, and the overall judge status', () => {
     const view = screen(REPORT)
     for (const s of mod.proofChain(REPORT)) {

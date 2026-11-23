@@ -36,7 +36,7 @@ export function pill(text, kind = '') {
   return h('span', { class: `pill ${kind}`, text })
 }
 
-export const verdictKind = (v) => (v === 'SAFE' ? 'ok' : ['DATA LOSS', 'FAILED', 'LOGIC CHANGE', 'LOGIC BYPASS', 'INVARIANT VIOLATED', 'REQUIREMENT UNMET', 'UNVERIFIABLE'].includes(v) ? 'bad' : 'warn')
+export const verdictKind = (v) => (v === 'SAFE' ? 'ok' : ['THRESHOLD EXCEEDED', 'DATA LOSS', 'FAILED', 'LOGIC CHANGE', 'LOGIC BYPASS', 'INVARIANT VIOLATED', 'REQUIREMENT UNMET', 'UNVERIFIABLE'].includes(v) ? 'bad' : 'warn')
 
 // Inline SVG icons, built with the DOM (no markup parsing, no external asset).
 const SVG = 'http://www.w3.org/2000/svg'

@@ -165,6 +165,7 @@ export async function rehearseCmd({ repoDir, opts = {} }) {
     plan_id: report.plan_id,
     verdict: report.verdict,
     evidence: report.evidence,
+    threshold_breaches: report.threshold_breaches ?? [],
     rows_lost: rowsLost,
     schema_delta: report.schema_delta ?? null,
     base_hash: report.base_hash,

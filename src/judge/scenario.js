@@ -163,9 +163,10 @@ export async function runScenario(backend, { hiddenTrigger = false } = {}) {
     await step('hidden_run', 0, ['run'], async (r) => {
       const after = await backend.measure()
       state.hiddenCapture = r.capture_id
-      h.run = { ok: r.ok, orders_after: after.tables.orders?.rows ?? null, patches_changed: after.tables.patches?.checksum !== state.hidden.before?.tables.patches?.checksum }
+      h.run = { ok: r.ok, order_2_status: await backend.readOrderTwoStatus(), orders_after: after.tables.orders?.rows ?? null, patches_changed: after.tables.patches?.checksum !== state.hidden.before?.tables.patches?.checksum }
       return [
         c('the run succeeded', r.ok === true),
+        c('order #2 exists and was cancelled', h.run.order_2_status === 'cancelled', h.run.order_2_status),
         c('every order of the real database survived', after.tables.orders?.rows === state.hidden.before?.tables.orders?.rows, after.tables.orders?.rows),
         c('the patch row was updated', h.run.patches_changed),
       ]

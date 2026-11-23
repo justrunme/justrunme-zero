@@ -126,6 +126,7 @@ describe('Demo judge: one command, a real Postgres, under 60 s', { skip: !enable
       assert.ok(JSON.stringify(h.dangerous.trigger_fired).includes('patches_release_sold_out'))
       assert.equal(h.dangerous.trigger_fired.fired, 1, JSON.stringify(h.dangerous.trigger_fired))
       assert.equal(h.denied.error, 'DATA_LOSS')
+      assert.equal(h.run.order_2_status, 'cancelled')
       assert.equal(h.safe.verdict, 'SAFE')
       assert.equal(h.safe.rows_lost.orders, 0)
       assert.equal(h.selection.decided_by, 'R15.4.1')

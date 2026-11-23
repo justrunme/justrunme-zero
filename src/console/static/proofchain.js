@@ -149,5 +149,22 @@ export function proofChainScreen(_state, ctx) {
       h('h1', { text: 'Proof chain' }),
       h('span', { class: `pc-overall ${overall === 'PASS' && steps.every((s) => s.tone === 'ok') ? 'ok' : overall === 'FAIL' ? 'bad' : 'mute'}`, 'data-overall': '', text: `judge ${overall}` }),
       h('span', { class: 'pc-source muted', text: [jr.file ? `from ${jr.file}` : null, elapsed].filter(Boolean).join(' · ') })),
+    jr.report.story?.hidden_trigger && comparisonView(jr.report, steps),
     stepsView(steps))
+}
+
+function comparisonView(report, steps) {
+  const loss = steps.find((s) => s.key === 'loss')
+  const denied = steps.find((s) => s.key === 'denied')
+  const run = report.story.hidden_trigger.run
+  const cancelled = run?.ok === true && run.order_2_status === 'cancelled'
+    && judgeSteps(report, ['hidden_run'])[0].status === 'passed'
+  function card(label, detail, tone) {
+    return h('div', { class: 'pc-comparison-card' },
+      h('strong', { text: label }), h('span', { class: tone, text: detail }))
+  }
+  return h('section', { class: 'pc-comparison', 'aria-label': 'Hidden-trigger run at a glance' },
+    card('Rehearsal copy', loss.tone === 'ok' ? loss.value : 'Order loss unconfirmed', ''),
+    card('Target database', denied.tone === 'ok' ? 'Dangerous plan blocked before execution' : 'Denial unconfirmed', ''),
+    card('After the approved run', cancelled ? 'Order #2 · cancelled, not deleted' : 'Order #2 status unavailable', ''))
 }

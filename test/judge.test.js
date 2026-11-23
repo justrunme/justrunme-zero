@@ -418,6 +418,7 @@ describe('Judge hidden-trigger case is opt-in', () => {
       compare: () => ({ exit: 0, out: { result: { recommended: 'plan-hs', decided_by: 'R15.4.1', removed: [{ plan_id: 'plan-hd' }] } } }),
     }
     b.cli = async (args) => (hidden(b.state.kind) && answers[args[0]] ? answers[args[0]](args) : base(args))
+    b.readOrderTwoStatus = async () => 'cancelled'
     b.installHiddenTrigger = async () => { flags.installed++ }
     const measure = b.measure
     b.measure = async () => {
