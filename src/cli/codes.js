@@ -35,11 +35,12 @@ export const EXIT = Object.freeze({
   REQUIREMENT_UNMET: 29, // rehearse: a required change of the mission was not made
   CONFLICT: 32, // rehearse: the mission's requirements cannot all hold (CONFLICT: requirements unsatisfiable); nothing ran
   RECOVERY_UNVERIFIED: 33, // undo: restored and nothing failed, but a required check could not be made (RESTORED_UNVERIFIED)
+  THRESHOLD_EXCEEDED: 37, // rehearse: max_rows_deleted policy threshold breached
   GATE_INACTIVE: 34, // gate-probe: the probe command ran unblocked (INACTIVE)
   GATE_UNKNOWN: 35, // gate-probe: no proof either way yet (UNKNOWN; never means blocked)
   RECOVERY_NOT_PROVEN: 36, // chaos: the recovery rehearsal did not end RECOVERY PROVEN (see the verdict)
 })
 
 /** Exit code for a rehearsal verdict. */
-const VERDICT_EXIT = { SAFE: EXIT.OK, 'DATA LOSS': EXIT.DATA_LOSS, 'LOGIC CHANGE': EXIT.LOGIC_CHANGE, 'LOGIC BYPASS': EXIT.LOGIC_BYPASS, UNVERIFIABLE: EXIT.UNVERIFIABLE, 'INVARIANT VIOLATED': EXIT.INVARIANT_VIOLATED, 'REQUIREMENT UNMET': EXIT.REQUIREMENT_UNMET }
+const VERDICT_EXIT = { SAFE: EXIT.OK, 'DATA LOSS': EXIT.DATA_LOSS, 'LOGIC CHANGE': EXIT.LOGIC_CHANGE, 'LOGIC BYPASS': EXIT.LOGIC_BYPASS, UNVERIFIABLE: EXIT.UNVERIFIABLE, 'INVARIANT VIOLATED': EXIT.INVARIANT_VIOLATED, 'REQUIREMENT UNMET': EXIT.REQUIREMENT_UNMET, 'THRESHOLD EXCEEDED': EXIT.THRESHOLD_EXCEEDED }
 export const verdictExit = (verdict) => VERDICT_EXIT[verdict] ?? EXIT.REHEARSAL_FAILED

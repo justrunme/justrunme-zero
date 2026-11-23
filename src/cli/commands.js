@@ -273,6 +273,13 @@ export async function authorizeCmd({ repoDir, opts = {} }) {
   return { exit: EXIT.OK, result: { mission_id: auth.mission_id, plan_id: auth.plan_id, selection: auth.selection ?? null, expires_at: auth.expires_at, fingerprint_hash: auth.fingerprint_hash } }
 }
 
+/** A completed step sequence is not a successful run without a measured match. */
+export function runExitCode(r) {
+  if (!r.ok || r.outcome?.matches !== true) return EXIT.RUN_FAILED
+  if (r.skipped_needs_approval.length > 0) return EXIT.RUN_INCOMPLETE
+  return EXIT.OK
+}
+
 export async function runCmd({ repoDir, opts = {} }) {
   const c = contractOf(repoDir, opts)
   const { target } = targetOf(repoDir)
@@ -287,7 +294,7 @@ export async function runCmd({ repoDir, opts = {} }) {
   }
   const result = { mission_id: r.mission_id, plan_id: r.plan_id, ok: r.ok, capture_id: r.capture_id, skipped_needs_approval: r.skipped_needs_approval, steps: r.steps, outcome: r.outcome, receipt_hash: r.receipt_hash, receipt_error: r.receipt_error }
   unrecorded(result)
-  const exit = !r.ok ? EXIT.RUN_FAILED : r.skipped_needs_approval.length > 0 ? EXIT.RUN_INCOMPLETE : EXIT.OK
+  const exit = runExitCode(r)
   return { exit, result }
 }
 
