@@ -2,7 +2,7 @@
 
 ## Current main check (23 November 2026, `6ccfdf3792636f311c3b74c305552733634f2022`)
 
-A new `git clone --branch main --single-branch` of current `origin/main` passed the full judge path on **macOS arm64**, Node **v26.13.1**, npm **11.20.0**, Docker client/server **28.4.0**. The `postgres:16.3-alpine` image was **already cached** (this is not a first-pull timing). Local Git author/committer identity was configured in the clone before any changes.
+A new `git clone --branch main --single-branch` of current `origin/main` passed the full judge path on **macOS arm64**, Node **v26.13.1**, npm **11.20.0**, Docker client/server **28.4.0**. The `postgres:16.3-alpine` image was **already cached**.
 
 | Command (fresh clone, in order) | Exit | Measured wall time | Key evidence |
 | --- | ---: | ---: | --- |
@@ -13,7 +13,11 @@ A new `git clone --branch main --single-branch` of current `origin/main` passed 
 | `node src/cli/index.js console --judge-report judge.json` | Started, then stopped | HTTP probe | Printed `result.proof_chain_url` was present; its local HTTP endpoint returned **200**. The private token is deliberately not reproduced. |
 | One-byte tamper demonstration (throwaway copy; runbook Node script) | 0 / 30 / 0 | under 1 s total (whole script) | **CLEAN exit 0**, **TAMPERED exit 30**, **RESTORED exit 0** |
 
-The Console was stopped after the HTTP probe. Cleanup checks of `docker ps -a`, `docker network ls` and `docker volume ls` found **no `jrm-judge-*` resources**. No unrelated containers were intentionally changed. This is an HTTP serving check, not a browser UI acceptance test. The durations above are whole-second shell-clock measurements, except the judge's own 42.1-second timing.
+The **708 passed** result is from plain `npm test`; the README's **730 passed** result used `JRM_DOCKER_TESTS=1 npm test` at commit `59336da`.
+
+The Console was stopped after the HTTP probe. Cleanup checks of `docker ps -a`, `docker network ls` and `docker volume ls` found **no `jrm-judge-*` resources**.
+
+*Wall times in the table are rounded to whole seconds; the judge also reported 42.1 seconds.*
 
 ## Historical measurements (21 November 2026; earlier revisions only)
 
