@@ -156,7 +156,9 @@ export function proofChainScreen(_state, ctx) {
 function comparisonView(report, steps) {
   const loss = steps.find((s) => s.key === 'loss')
   const denied = steps.find((s) => s.key === 'denied')
-  const run = report.story.hidden_trigger.run
+  const hidden = report.story.hidden_trigger
+  const run = hidden.run
+  const copyResult = hidden.dangerous?.order_2_missing === true ? loss.value + ' · Order #2 disappeared' : loss.value
   const cancelled = run?.ok === true && run.order_2_status === 'cancelled'
     && judgeSteps(report, ['hidden_run'])[0].status === 'passed'
   function card(label, detail, tone) {
@@ -164,7 +166,7 @@ function comparisonView(report, steps) {
       h('strong', { text: label }), h('span', { class: tone, text: detail }))
   }
   return h('section', { class: 'pc-comparison', 'aria-label': 'Hidden-trigger run at a glance' },
-    card('Rehearsal copy', loss.tone === 'ok' ? loss.value : 'Order loss unconfirmed', ''),
+    card('Rehearsal copy', loss.tone === 'ok' ? copyResult : 'Order loss unconfirmed', ''),
     card('Target database', denied.tone === 'ok' ? 'Dangerous plan blocked before execution' : 'Denial unconfirmed', ''),
     card('After the approved run', cancelled ? 'Order #2 · cancelled, not deleted' : 'Order #2 status unavailable', ''))
 }

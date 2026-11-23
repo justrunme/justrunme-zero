@@ -406,7 +406,7 @@ describe('Judge hidden-trigger case is opt-in', () => {
     const b = fakeBackend()
     const base = b.cli
     const flags = { installed: 0, ran: false }
-    const evidence = [{ kind: 'protected_rows_lost', table: 'orders', rows_before: 12, rows_after: 11 }, { kind: 'trigger_fired', trigger: 'patches_release_sold_out', count: 1 }]
+    const evidence = [{ kind: 'requirement_unmet', table: 'orders', where: { id: 2 }, rows: 0 }, { kind: 'protected_rows_lost', table: 'orders', rows_before: 12, rows_after: 11 }, { kind: 'trigger_fired', trigger: 'patches_release_sold_out', count: 1 }]
     const hidden = (k) => k === 'hidden_dangerous' || k === 'hidden_safe'
     const answers = {
       rehearse: () => b.state.kind === 'hidden_dangerous'

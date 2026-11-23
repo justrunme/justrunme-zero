@@ -125,11 +125,14 @@ export async function runScenario(backend, { hiddenTrigger = false } = {}) {
     await step('hidden_rehearse_dangerous', 10, ['rehearse'], async (r) => {
       const lost = ordersEvidence(r)
       const fired = (r.evidence ?? []).find((e) => e.kind === 'trigger_fired') ?? null
-      h.dangerous = { verdict: r.verdict, rows_lost: r.rows_lost, orders_before: lost?.rows_before ?? null, orders_after: lost?.rows_after ?? null, trigger_fired: fired }
+      const missingOrder = (r.evidence ?? []).some((e) =>
+        e.kind === 'requirement_unmet' && e.table === 'orders' && e.where?.id === 2 && e.rows === 0)
+      h.dangerous = { order_2_missing: missingOrder, verdict: r.verdict, rows_lost: r.rows_lost, orders_before: lost?.rows_before ?? null, orders_after: lost?.rows_after ?? null, trigger_fired: fired }
       state.hiddenDangerous = r.plan_id
       state.hiddenBase = r.base_hash
       return [
         c('verdict is DATA LOSS', r.verdict === 'DATA LOSS', r.verdict),
+        c('order #2 is missing in the rehearsal copy', missingOrder),
         c('orders lost were measured (fewer after than before)', lost !== null && lost.rows_after < lost.rows_before, lost),
         c('the measured start equals the orders of the real database', lost?.rows_before === state.hidden.before?.tables.orders?.rows, lost?.rows_before),
         c('the trigger that fired is named', fired !== null && JSON.stringify(fired).includes('patches_release_sold_out'), fired),

@@ -329,6 +329,7 @@ export async function createBackend({ env = process.env, probe = run, nodeVersio
             objective: 'Add order status tracking to the demo service',
             allowed_paths: ['demo/migrations/'],
             protected_tables: ['orders', 'patches'],
+            ...(kind.startsWith('hidden_') ? { required_changes: [{ table: 'orders', where: { id: 2 }, set: { status: 'cancelled' } }] } : {}),
             time_limit_seconds: 300,
             irreversible_actions: [],
             plan: [{ id: 'migrate', tool: 'sql_migration', args: [MIGRATIONS[kind]], reversibility: true }],
