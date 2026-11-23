@@ -1,6 +1,27 @@
-# Fresh-clone judge quickstart (Mac, 21 November 2026)
+# Fresh-clone judge quickstart (Mac, 23 November 2026)
 
-This records two fresh-checkout checks: the original full judge and test run at **origin/main `de256225e4936ad38955c7cbd0b9eb917ce20ea6`**, and a later **`npm ci` + `npm test`** verification at **origin/main `0ea290b97be9bc199fa802f61bd0f6043a005950`** (Round 1). These are separate revisions, not one combined test run. Neither proves every host or Node version works. The checkout was newly cloned into `/tmp/jrm-judge-refresh-87xMgm` (resolved by macOS to `/private/tmp/jrm-judge-refresh-87xMgm`). It was not the development checkout.
+## Current main check (23 November 2026, `6ccfdf3792636f311c3b74c305552733634f2022`)
+
+A new `git clone --branch main --single-branch` of current `origin/main` passed the full judge path on **macOS arm64**, Node **v26.13.1**, npm **11.20.0**, Docker client/server **28.4.0**. The `postgres:16.3-alpine` image was **already cached**.
+
+| Command (fresh clone, in order) | Exit | Measured wall time | Key evidence |
+| --- | ---: | ---: | --- |
+| `npm ci` | 0 | 1 s | Dependencies installed |
+| `npm test` | 0 | 127 s | **708 tests, 708 passed, 0 failed, 0 skipped** (140 suites; 0 cancelled, 0 todo) |
+| `node src/cli/index.js judge --text` | 0 | 42 s | `judge: ok (exit 0)`; `PASS in 42.1 s (budget 60 s, enforced)`; `receipts verified: 8, mismatches: 0, policy violations: 0` |
+| `node src/cli/index.js judge --hidden-trigger > judge.json` | 0 | 77 s | Full JSON report written; hidden-trigger judge completed successfully |
+| `node src/cli/index.js console --judge-report judge.json` | Started, then stopped | HTTP probe | Printed `result.proof_chain_url` was present; its local HTTP endpoint returned **200**. The private token is deliberately not reproduced. |
+| One-byte tamper demonstration (throwaway copy; runbook Node script) | 0 / 30 / 0 | under 1 s total (whole script) | **CLEAN exit 0**, **TAMPERED exit 30**, **RESTORED exit 0** |
+
+The **708 passed** result is from plain `npm test`; the README's **730 passed** result used `JRM_DOCKER_TESTS=1 npm test` at commit `59336da`.
+
+The Console was stopped after the HTTP probe. Cleanup checks of `docker ps -a`, `docker network ls` and `docker volume ls` found **no `jrm-judge-*` resources**.
+
+*Wall times in the table are rounded to whole seconds; the judge also reported 42.1 seconds.*
+
+## Historical measurements (21 November 2026; earlier revisions only)
+
+The following results are retained as revision-specific history, **not current-main measurements**. The original full judge run was on `de256225e4936ad38955c7cbd0b9eb917ce20ea6`; a separate `npm ci`/`npm test` run was on `0ea290b97be9bc199fa802f61bd0f6043a005950`. They must not be combined into one run.
 
 ## Prerequisites observed
 
@@ -9,7 +30,7 @@ This records two fresh-checkout checks: the original full judge and test run at 
 - `DOCKER_DEFAULT_PLATFORM` was **unset**; no platform workaround was needed.
 - Node 26 is newer than the README's Node 24 minimum, and the full suite passed on Node 26. Node 24.22.3 was also tested separately using npx.
 
-## Exact fresh-checkout path
+## Historical fresh-checkout path (21 November)
 
 | Step / command | Result | Wall time / evidence |
 | --- | --- | --- |
@@ -24,7 +45,7 @@ This records two fresh-checkout checks: the original full judge and test run at 
 
 The original `de25622` test used `npm install`; **current README instead prescribes `npm ci`**. The Round 1 fresh clone at `0ea290b` ran exactly `npm ci` successfully (6 packages, 0 vulnerabilities). The **573/573** original tests, judge, and Console measurements below belong to **`de25622`**. The newer **573/573** test result belongs to **`0ea290b`**; judge and Console were not rerun at that revision. A separate `npx --yes node@24 --test test/*.test.js` run on Node 24.22.3 also passed all 573 tests (exit 0, 47 s); this is not the exact npm script invocation. The README does explicitly document `npm test` and `node src/cli/index.js judge --text`; its CLI reference documents `justrunme console [--port n]`. The console port `47891` was free during this test. Never publish or reuse the Console's per-start token.
 
-## Judge demo: expected output
+## Historical default judge output (`de25622`)
 
 With Docker running and the Postgres image cached, use:
 
@@ -75,13 +96,13 @@ The [recording runbook](submission/RECORDING_RUNBOOK.md) reproduces the receipt-
 
 ## Troubleshooting and gaps found
 
-1. **Full test suite now passes on Node 26.** The fresh clone at `de25622` passed 573/573 tests (exit 0, 117 s). The earlier 10 live-run failures recorded against `316625a` are no longer reproduced. This confirms the tested revision and environment, not every platform or future revision.
+1. **Full test suite passed on Node 26 in both historical and current checks.** The historical clone at `de25622` passed 573/573 tests (exit 0, 117 s); current main `6ccfdf3` passed 708/708 (exit 0, 127 s). The earlier 10 live-run failures recorded against `316625a` are no longer reproduced. This confirms the tested revision and environment, not every platform or future revision.
 2. **README now gives a one-line judge start:** `npm ci && node src/cli/index.js judge --text` near the top. Its “Try the judge demo” section also shows `npm ci`, `judge --text`, and `console` together. `npm test` remains in the separate Development section; a judge seeking full-suite verification still needs to locate it. This document retains the measured fresh-checkout evidence without changing README.
-3. **Docker is mandatory for judge mode.** This run had a local daemon and cached image, so first-time image pull time and no-Docker error output were **not** measured. The 60-second budget was enforced here because the image was cached.
-4. **Node version coverage is limited.** Node 26.13.1 passed the full npm test command; Node 24.22.3 passed the equivalent direct Node test invocation. Other versions and platforms were not tested in this fresh clone.
+3. **Docker is mandatory for judge mode.** The checks had a local daemon and cached image, so first-time image pull time and no-Docker error output were **not** measured. The 60-second budget was enforced here because the image was cached.
+4. **Node version coverage is limited.** Node 26.13.1 passed the current full npm test command; Node 24.22.3 passed the equivalent direct Node test invocation. Other versions and platforms were not tested in this fresh clone.
 5. **No browser UI acceptance test was performed.** HTTP 200 confirms that the Console served HTML, not that its interactive workflows were exercised.
 
-## Cleanup
+## Historical cleanup (`de25622`)
 
 - The judge command removed its own temporary containers, networks and volumes: no `jrm-judge-*` resources remained in `docker ps -a`, `docker network ls` or `docker volume ls` after the run; the judge command reported successful cleanup.
 - The Console listener on port `47891` was stopped and verified absent with `lsof`.
