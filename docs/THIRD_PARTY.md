@@ -66,13 +66,23 @@ NODE
 | `actions/setup-node@v4` | `.github/workflows/ci.yml:81` |
 | `actions/checkout@v4` | `.github/workflows/ci.yml:97` |
 
+## npm lockfile license check
+
+No npm lockfile dependency has a license outside the specified allowlist. Verified by the command below (output: `[]`):
+
+```sh
+node - <<'NODE'
+const l=require('./package-lock.json').packages; const ok=new Set(['MIT','ISC','BSD','BSD-2-Clause','BSD-3-Clause','Apache-2.0','0BSD','BlueOak','CC0','CC0-1.0']); console.log(Object.entries(l).filter(([p,m])=>p && !ok.has(m.license||'UNKNOWN')).map(([p,m])=>[p,m.license||'UNKNOWN']));
+NODE
+```
+
 ## Container component inventory (2026-11-23)
 
 The [official rules](https://kiroween.devpost.com/rules) were fetched successfully (HTTP 200). The rules require: “The repository must be public and open source by including an open source license file.” They also say: “If a Project integrates any third-party SDK, APIs and/or data, Entrant must be authorized to use them in accordance with any terms and conditions or licensing requirements of the tool.” On open-source reuse: “An Entrant may submit a Submission that includes the use of open source software or hardware, provided the Entrant complies with applicable open source licenses”. The [overview](https://kiroween.devpost.com/) also returned HTTP 200.
 
 **Finding:** The retrieved rules do **not** enumerate an exclusive list of permitted third-party SPDX identifiers. In particular, they do not prohibit the **PostgreSQL License** by name, nor GPL/LGPL components in Alpine images. The repository's own MIT license is a separate requirement. Therefore there is no *textual license-name conflict* for PostgreSQL or the installed Alpine components. This does **not** prove compliance with all redistribution/notice/source obligations or confer rights to third-party materials. The PostgreSQL License is recorded under its actual name, not relabelled BSD.
 
-Inventory below uses installed package metadata inside the **pulled images** (not a guessed base image package list), and bundled npm/corepack package.json declarations. `OK*` means **no contradiction with the quoted rule's license-name wording**, *not* legal clearance; `needs action` means no declared license was present in the inspected metadata and needs manual review. This inventory is architecture/time dependent, not an SBOM, and tags may change. Images were inspected on the Mac's Docker host; no immutable image references were added to the repository.
+Inventory below uses installed package metadata inside the **pulled images** (not a guessed base image package list), and bundled npm/corepack package.json declarations. `OK*` means **no contradiction with the quoted rule's license-name wording**, *not* legal clearance; `OK (virtual package, no code)` identifies an image-created apk dependency meta-package, not a separate software component. Bundled packages can carry a license file even when package.json omits a declaration. This inventory is architecture/time dependent, not an SBOM, and tags may change. Images were inspected on the Mac's Docker host; no immutable image references were added to the repository.
 
 Commands executed:
 
@@ -93,7 +103,7 @@ Observed image digests at audit time: postgres `sha256:36ed71227ae36305d26382657
 
 | Image | Component | Installed version | Declared license | Metadata/upstream source | Verdict |
 | --- | --- | --- | --- | --- | --- |
-| postgres:16.3-alpine | .postgresql-rundeps | 20240724.012926 | UNDECLARED | https://pkgs.alpinelinux.org/packages | needs action |
+| postgres:16.3-alpine | .postgresql-rundeps | 20240724.012926 | N/A (virtual meta-package) | https://github.com/docker-library/postgres/blob/master/16/alpine3.23/Dockerfile | OK (virtual package, no code) |
 | postgres:16.3-alpine | alpine-baselayout | 3.6.5-r0 | GPL-2.0-only | https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout | OK* |
 | postgres:16.3-alpine | alpine-baselayout-data | 3.6.5-r0 | GPL-2.0-only | https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout | OK* |
 | postgres:16.3-alpine | alpine-keys | 2.4-r1 | MIT | https://alpinelinux.org | OK* |
@@ -271,7 +281,7 @@ Observed image digests at audit time: postgres `sha256:36ed71227ae36305d26382657
 | node:24-alpine | promise-all-reject-late | 1.0.1 | ISC | https://github.com/npm/cli | OK* |
 | node:24-alpine | promise-call-limit | 3.0.2 | ISC | https://github.com/npm/cli | OK* |
 | node:24-alpine | promzard | 3.0.1 | ISC | https://github.com/npm/cli | OK* |
-| node:24-alpine | qrcode-terminal | 0.12.0 | UNDECLARED | https://github.com/gtanner/qrcode-terminal | needs action |
+| node:24-alpine | qrcode-terminal | 0.12.0 | Apache-2.0 (bundled LICENSE; includes MIT notice for vendored QRCode) | https://github.com/gtanner/qrcode-terminal | OK* |
 | node:24-alpine | read | 5.0.1 | ISC | https://github.com/npm/cli | OK* |
 | node:24-alpine | read-cmd-shim | 6.0.0 | ISC | https://github.com/npm/read-cmd-shim#readme | OK* |
 | node:24-alpine | safer-buffer | 2.1.2 | MIT | https://github.com/npm/cli | OK* |
@@ -305,4 +315,4 @@ Observed image digests at audit time: postgres `sha256:36ed71227ae36305d26382657
 | postgres:16.3-alpine | PostgreSQL | 16.3 | PostgreSQL License | https://www.postgresql.org/about/licence/ | OK* |
 | node:24-alpine | Node.js | 24.22.3 | MIT (upstream LICENSE) | https://github.com/nodejs/node/blob/v24.22.3/LICENSE | OK* |
 
-**Open actions:** For any `needs action` row, inspect its upstream license file and provenance before submission. For all rows, Andrey must confirm applicable notices, source/redistribution obligations, assets, originality, and sponsor-conflict eligibility. The images also contain upstream application and runtime files outside the Alpine package database; this inventory does not certify every copied file. No image tag or digest was changed.
+**Open actions:** Both initially undeclared metadata rows have been investigated: the installed `.postgresql-rundeps` apk record states `T:virtual meta package`, `S:0`, `I:0`, `L:` (blank), and the [official Dockerfile](https://github.com/docker-library/postgres/blob/master/16/alpine3.23/Dockerfile) creates it with `apk add --no-cache --virtual .postgresql-rundeps`; it is not third-party code. The bundled `qrcode-terminal/LICENSE` in `node:24-alpine` contains Apache License 2.0 and an MIT notice for its vendored QRCode. For all rows, Andrey must still confirm applicable notices, source/redistribution obligations, assets, originality, and sponsor-conflict eligibility. The images also contain upstream application and runtime files outside the Alpine package database; this inventory does not certify every copied file. No image tag or digest was changed.
