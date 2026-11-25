@@ -96,7 +96,7 @@ IDs are stable; do not renumber existing IDs when adding new ones.
 
 **R6.1** WHEN a contract lists an action with `reversibility: false`, THE SYSTEM SHALL mark it as irreversible in the impact report and require out-of-band approval before the action executes.
 
-**R6.2** WHEN any rehearsed action has a measured impact that exceeds a configured threshold (e.g. rows deleted > 1000, external API calls > 0), THE SYSTEM SHALL escalate the action to irreversible and require out-of-band approval even if the contract did not flag it.
+**R6.2** WHEN any rehearsed action has a measured impact that exceeds a configured threshold (e.g. rows deleted > 1000, external API calls > 0), THE SYSTEM SHALL escalate the action to irreversible and require out-of-band approval even if the contract did not flag it. WHEN rehearsal measures a breach of `max_rows_deleted`, THE SYSTEM SHALL return `THRESHOLD EXCEEDED` and deny the plan until a revised plan stays within the limit.
 
 **R6.3** WHEN out-of-band approval is required, THE SYSTEM SHALL issue a WebAuthn challenge whose value is the SHA-256 hash of the exact canonical serialized action payload.
 
