@@ -106,7 +106,7 @@ export function issueAuthorization({ cwd, contract, contractHash, report, curren
   if (!report || report.mission_id !== contract.id) throw new AuthorizationRefused('NO_REHEARSAL', 'no rehearsal report for this mission')
   if (report.contract_hash !== contractHash) throw new AuthorizationRefused('CONTRACT_CHANGED', 'contract changed after rehearsal')
   if (report.verdict !== 'SAFE') {
-    const code = { 'DATA LOSS': 'DATA_LOSS', 'LOGIC CHANGE': 'LOGIC_CHANGE', 'LOGIC BYPASS': 'LOGIC_BYPASS', UNVERIFIABLE: 'UNVERIFIABLE', 'INVARIANT VIOLATED': 'INVARIANT_VIOLATED', 'REQUIREMENT UNMET': 'REQUIREMENT_UNMET' }[report.verdict] ?? 'NOT_SAFE'
+    const code = { 'THRESHOLD EXCEEDED': 'THRESHOLD_EXCEEDED', 'DATA LOSS': 'DATA_LOSS', 'LOGIC CHANGE': 'LOGIC_CHANGE', 'LOGIC BYPASS': 'LOGIC_BYPASS', UNVERIFIABLE: 'UNVERIFIABLE', 'INVARIANT VIOLATED': 'INVARIANT_VIOLATED', 'REQUIREMENT UNMET': 'REQUIREMENT_UNMET' }[report.verdict] ?? 'NOT_SAFE'
     throw new AuthorizationRefused(code, `rehearsal verdict is ${report.verdict}`, report.evidence)
   }
   const fidelity = compareFingerprints(report.fingerprint, currentFingerprint)

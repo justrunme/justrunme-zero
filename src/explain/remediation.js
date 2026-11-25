@@ -11,10 +11,11 @@
 
 export const ATTEMPT_LIMIT = 8
 
-const REASON = Object.freeze({ 'DATA LOSS': 'DATA_LOSS', 'LOGIC CHANGE': 'LOGIC_CHANGE', 'LOGIC BYPASS': 'LOGIC_BYPASS', UNVERIFIABLE: 'UNVERIFIABLE', 'INVARIANT VIOLATED': 'INVARIANT_VIOLATED', 'REQUIREMENT UNMET': 'REQUIREMENT_UNMET' })
-const RULE = Object.freeze({ 'DATA LOSS': 'R2.6', 'LOGIC CHANGE': 'T25.1', 'LOGIC BYPASS': 'T25.2', UNVERIFIABLE: 'T25.2', 'INVARIANT VIOLATED': 'T25.3', 'REQUIREMENT UNMET': 'T25.3' })
+const REASON = Object.freeze({ 'THRESHOLD EXCEEDED': 'THRESHOLD_EXCEEDED', 'DATA LOSS': 'DATA_LOSS', 'LOGIC CHANGE': 'LOGIC_CHANGE', 'LOGIC BYPASS': 'LOGIC_BYPASS', UNVERIFIABLE: 'UNVERIFIABLE', 'INVARIANT VIOLATED': 'INVARIANT_VIOLATED', 'REQUIREMENT UNMET': 'REQUIREMENT_UNMET' })
+const RULE = Object.freeze({ 'THRESHOLD EXCEEDED': 'R6.2', 'DATA LOSS': 'R2.6', 'LOGIC CHANGE': 'T25.1', 'LOGIC BYPASS': 'T25.2', UNVERIFIABLE: 'T25.2', 'INVARIANT VIOLATED': 'T25.3', 'REQUIREMENT UNMET': 'T25.3' })
 
 const NEXT = Object.freeze({
+  'THRESHOLD EXCEEDED': 'REVISE_AND_REHEARSE',
   SAFE: 'REQUEST_APPROVAL',
   'DATA LOSS': 'REVISE_AND_REHEARSE',
   'LOGIC CHANGE': 'REVISE_AND_REHEARSE',
@@ -125,6 +126,7 @@ export function explainReport(report, attempts, { sqlText = null } = {}) {
       schema_delta: schemaDelta,
       evidence,
       failed_steps: failedSteps,
+      threshold_breaches: report.threshold_breaches ?? [],
       unnamed_new_objects: hidden.size,
     },
     remediation: safe
@@ -141,7 +143,9 @@ export function explainReport(report, attempts, { sqlText = null } = {}) {
                     ? 'Revise the plan so that it makes the required change and every invariant of the mission holds, then rehearse the revision.'
                   : report.verdict === 'UNVERIFIABLE'
                     ? 'This rehearsal cannot be trusted; ask the operator.'
-                    : 'Make the plan apply cleanly, then rehearse it again.',
+                    : report.verdict === 'THRESHOLD EXCEEDED'
+                      ? 'Reduce the row loss to the configured limit and rehearse again.'
+                      : 'Make the plan apply cleanly, then rehearse it again.',
           constraints: constraintsFor(evidence, failedSteps),
           next_action: exhausted ? NEXT.LIMIT : NEXT[report.verdict] ?? NEXT.FAILED,
           caution: 'These are measurements of the plan just rehearsed, not a proof that a revised plan is safe. Only a new rehearsal with verdict SAFE shows that.',

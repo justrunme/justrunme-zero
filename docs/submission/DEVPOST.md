@@ -86,7 +86,7 @@ Kiro CLI and IDE, Kiro specs/steering/agents/hooks, Node.js (24+), JavaScript, `
 
 ## Submission video
 
-The [planned 1:36 demo video script](../DEMO_VIDEO.md) is **under the 3-minute limit** stated in the [submission checklist](CHECKLIST.md). The video has **not yet been recorded, publicly uploaded or submitted**, so the script is not a substitute for the required public video.
+The [planned 2:15 The Case of the Vanishing Order script](../DEMO_VIDEO.md) is **under the 3-minute limit** stated in the [submission checklist](CHECKLIST.md). The video has **not yet been recorded, publicly uploaded or submitted**, so the script is not a substitute for the required public video.
 
 ## Try it out
 
@@ -104,6 +104,6 @@ Sources (internal; remove this section before pasting into Devpost):
 - Gate test corpus and its scope (13 denied, 1 allowed; not rehearsals): docs/EXAMPLES.md; test/gate-examples.test.js
 - Recorded Chaos Twin recovery, signed receipt, original CLI verification and portable signature check: docs/evidence/chaos-live-2026-11-20/README.md; docs/evidence/chaos-live-2026-11-20/chaos.json; docs/evidence/chaos-live-2026-11-20/verify.json
 - Fresh-clone judge timings (both Docker image cached): [docs/submission/RECORDING_RUNBOOK.md](RECORDING_RUNBOOK.md); README.md for npm ci and judge command
-- Frankenstein category, video under 3 minutes and missing public upload: docs/submission/CHECKLIST.md; docs/DEMO_VIDEO.md (1:36 script)
+- Frankenstein category, video under 3 minutes and missing public upload: docs/submission/CHECKLIST.md; docs/DEMO_VIDEO.md (2:15 The Case of the Vanishing Order script)
 - Dependencies: package.json; demo/docker-compose.yml
 -->

@@ -17,6 +17,7 @@
  *                 skipped with session_replication_role, leaves no trace here (measure.js).
  *   INVARIANT VIOLATED  an invariant of the mission (src/mission/requirements.js) does not hold
  *   REQUIREMENT UNMET   a required change of the mission was not made
+ *   THRESHOLD EXCEEDED  the measured row deletions exceed max_rows_deleted
  *   SAFE       otherwise
  */
 
@@ -99,6 +100,11 @@ export function buildImpact({ before, after, protectedTables, steps, thresholds 
   // plan, or a refused attempt, denies; observers that cannot be trusted never give SAFE.
   const bypassEvidence = bypass?.evidence ?? []
   const unverifiable = bypass?.unverifiable ?? []
+  const threshold_breaches = []
+  if (Number.isInteger(thresholds.max_rows_deleted) && rowsDeleted > thresholds.max_rows_deleted) {
+    threshold_breaches.push({ threshold: 'max_rows_deleted', limit: thresholds.max_rows_deleted, measured: rowsDeleted })
+  }
+
   const verdict =
     bypassEvidence.length > 0 ? 'LOGIC BYPASS'
       : unverifiable.length > 0 ? 'UNVERIFIABLE'
@@ -107,15 +113,12 @@ export function buildImpact({ before, after, protectedTables, steps, thresholds 
             : logicEvidence.length > 0 ? 'LOGIC CHANGE'
               : (requirements?.violated.length ?? 0) > 0 ? 'INVARIANT VIOLATED'
                 : (requirements?.unmet.length ?? 0) > 0 ? 'REQUIREMENT UNMET'
+                  : threshold_breaches.length > 0 ? 'THRESHOLD EXCEEDED'
                   : 'SAFE'
   // T25 v3: which existing trigger acted during a plan that lost data (facts only).
   const fired = verdict === 'DATA LOSS' ? (bypass?.fired ?? []).map((f) => ({ kind: 'trigger_fired', ...f })) : []
   evidence.push(...fired, ...logicEvidence, ...bypassEvidence, ...unverifiable.map((why) => ({ kind: 'unverifiable', why })), ...(requirements?.violated ?? []), ...(requirements?.unmet ?? []))
 
-  const threshold_breaches = []
-  if (Number.isInteger(thresholds.max_rows_deleted) && rowsDeleted > thresholds.max_rows_deleted) {
-    threshold_breaches.push({ threshold: 'max_rows_deleted', limit: thresholds.max_rows_deleted, measured: rowsDeleted })
-  }
 
   return {
     verdict,

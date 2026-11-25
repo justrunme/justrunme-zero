@@ -125,11 +125,14 @@ export async function runScenario(backend, { hiddenTrigger = false } = {}) {
     await step('hidden_rehearse_dangerous', 10, ['rehearse'], async (r) => {
       const lost = ordersEvidence(r)
       const fired = (r.evidence ?? []).find((e) => e.kind === 'trigger_fired') ?? null
-      h.dangerous = { verdict: r.verdict, rows_lost: r.rows_lost, orders_before: lost?.rows_before ?? null, orders_after: lost?.rows_after ?? null, trigger_fired: fired }
+      const missingOrder = (r.evidence ?? []).some((e) =>
+        e.kind === 'requirement_unmet' && e.table === 'orders' && e.where?.id === 2 && e.rows === 0)
+      h.dangerous = { order_2_missing: missingOrder, verdict: r.verdict, rows_lost: r.rows_lost, orders_before: lost?.rows_before ?? null, orders_after: lost?.rows_after ?? null, trigger_fired: fired }
       state.hiddenDangerous = r.plan_id
       state.hiddenBase = r.base_hash
       return [
         c('verdict is DATA LOSS', r.verdict === 'DATA LOSS', r.verdict),
+        c('order #2 is missing in the rehearsal copy', missingOrder),
         c('orders lost were measured (fewer after than before)', lost !== null && lost.rows_after < lost.rows_before, lost),
         c('the measured start equals the orders of the real database', lost?.rows_before === state.hidden.before?.tables.orders?.rows, lost?.rows_before),
         c('the trigger that fired is named', fired !== null && JSON.stringify(fired).includes('patches_release_sold_out'), fired),
@@ -163,9 +166,10 @@ export async function runScenario(backend, { hiddenTrigger = false } = {}) {
     await step('hidden_run', 0, ['run'], async (r) => {
       const after = await backend.measure()
       state.hiddenCapture = r.capture_id
-      h.run = { ok: r.ok, orders_after: after.tables.orders?.rows ?? null, patches_changed: after.tables.patches?.checksum !== state.hidden.before?.tables.patches?.checksum }
+      h.run = { ok: r.ok, order_2_status: await backend.readOrderTwoStatus(), orders_after: after.tables.orders?.rows ?? null, patches_changed: after.tables.patches?.checksum !== state.hidden.before?.tables.patches?.checksum }
       return [
         c('the run succeeded', r.ok === true),
+        c('order #2 exists and was cancelled', h.run.order_2_status === 'cancelled', h.run.order_2_status),
         c('every order of the real database survived', after.tables.orders?.rows === state.hidden.before?.tables.orders?.rows, after.tables.orders?.rows),
         c('the patch row was updated', h.run.patches_changed),
       ]

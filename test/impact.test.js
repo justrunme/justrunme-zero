@@ -38,9 +38,9 @@ describe('impact verdict (R2.6)', () => {
     assert.equal(r.evidence[0].kind, 'table_removed')
   })
 
-  it('unprotected rows lost: reported, not DATA LOSS; threshold breach recorded', () => {
+  it('unprotected rows lost beyond policy threshold: not SAFE; threshold breach recorded', () => {
     const r = impact(db({ ...BEFORE.tables, patches: { rows: 1, checksum: 'z' } }, BEFORE.columns), { thresholds: { max_rows_deleted: 2 } })
-    assert.equal(r.verdict, 'SAFE')
+    assert.equal(r.verdict, 'THRESHOLD EXCEEDED')
     assert.equal(r.tables.patches.rows_lost, 4)
     assert.deepEqual(r.threshold_breaches, [{ threshold: 'max_rows_deleted', limit: 2, measured: 4 }])
   })

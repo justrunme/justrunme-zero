@@ -164,7 +164,8 @@ The hook protects it like the contract.
 | 10 | `rehearse`: DATA LOSS |
 | 11 | `rehearse`: a step failed or the copy did not start |
 | 12 | `compare`: no plan survived the rule |
-| 13 | `run`: a step failed; undo with the printed `capture_id` |
+| 13 | `run`: a step failed, the measured outcome differs from rehearsal, or the outcome could not be verified. Inspect the result and capture ID. |
+| 37 | `rehearse`: measured row loss exceeds the configured threshold. |
 | 14 | `undo`: not RECOVERED |
 | 15 | `run`: completed, but steps that need approval were skipped |
 | 16 | `rehearse`: the copy was not fully removed (it holds a dump of the real database) |

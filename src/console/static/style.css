@@ -633,3 +633,7 @@ body.is-home .side { display: none; }
 .pc-overall.ok { border-color: var(--green); color: var(--green); }
 .pc-overall.bad { border-color: var(--red); color: var(--red); }
 .pc-source { font-size: 20px; }
+
+.pc-comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .75rem; }
+.pc-comparison-card { display: grid; gap: .5rem; padding: 1rem; border: 1px solid currentColor; border-radius: .65rem; }
+.pc-comparison-card strong { font-size: .85rem; }
