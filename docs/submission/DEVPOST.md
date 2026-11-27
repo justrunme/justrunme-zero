@@ -45,7 +45,30 @@ The judge command creates temporary demo resources, rehearses a destructive chan
 
 ## How we built it
 
-Kiro was part of the development workflow, not a label added afterward. We used `.kiro/specs/justrunme-zero/` for requirements, design and tasks; `.kiro/steering/` for engineering and operator constraints; `.kiro/agents/` for specialized builder, operator and review configurations; and `.kiro/hooks/` for tool-use checks. The `PreToolUse` hook can deny commands that do not match the contract when `JUSTRUNME_GATE=on`; it is off unless explicitly enabled. Kiro CLI sessions exercised the actual rehearsal-and-repair loop, while Kiro IDE and gate checks were recorded separately with their limits. Session evidence and the work log live in `docs/agent-runs/` and `docs/KIRO_LOG.md`.
+### How we used Kiro
+
+Kiro is in the repo, not just in the credits. Everything below lives in the public `/.kiro` folder and the recorded runs in `docs/agent-runs/`.
+
+**Kiro CLI and Kiro IDE.** Most of the build ran in Kiro CLI: 49 numbered sessions are recorded in `docs/KIRO_LOG.md`. We used Kiro IDE to check the `PreToolUse` gate hook in a trusted workspace, where it blocked a destructive action.
+
+**Specs instead of vibe coding.** `.kiro/specs/justrunme-zero/` holds the requirements, the design and the task list. The builder agent works from the task queue in `tasks.md`, and the Stop hook makes the agent mark what it actually finished before closing. 72 subtasks are checked off there.
+
+**Five custom agents, each with its own job and permissions.**
+- `justrunme-operator` changes the database only through JustRunMe. It has no shell at all, can write only to `demo/migrations/**`, and talks to JustRunMe over MCP. It writes the migration, rehearses it, revises after a DENY, asks a human for approval and runs the approved plan.
+- `justrunme-skeptic` is read-only. It reviews the code for bypass paths, overclaims and scope creep, and never edits a file.
+- `justrunme-builder` implements spec tasks from `tasks.md` under the steering rules (no commits, exact dependency pins, `node --test` only).
+- `t25-reviewer` and `t25v2-developer` are the control arms of our T25 data-loss experiments: the same migration job without JustRunMe tools, so we could compare.
+
+**Three hooks.**
+- `PreToolUse` runs the JustRunMe gate before every tool call. With `JUSTRUNME_GATE=on` it is default-deny: 13 of 13 destructive actions in our test corpus were denied and the harmless read was allowed.
+- `PostFileSave` runs the smoke tests every time a JavaScript file is saved.
+- `Stop` makes the agent sync `tasks.md`, clean up scratch files and confirm it never committed, pushed or deployed on its own.
+
+**Steering.** Four files in `.kiro/steering/` (product, scope, engineering rules, operator loop) keep every agent on the same rules. The operator agent loads `operator-loop.md` directly, so rehearse, revise, approve, run is how it works, not a suggestion.
+
+**MCP.** JustRunMe ships its own MCP server (`src/mcp/server.js`) with nine tools for the agent workflow. There is deliberately no approval tool, so the agent cannot approve its own plan. In the recorded live run, the Kiro operator agent hit the hidden trigger (orders 3 to 2), got DENY, tried to disable the trigger, got DENY again for LOGIC BYPASS, and then shipped a safe plan that kept all 3 orders.
+
+**The result:** Kiro built JustRunMe, and JustRunMe now guards Kiro agents. The same agent loop we used to build it is the loop it protects.
 
 We stitched together the Kiro agent loop, an MCP server, a Node.js CLI, Docker Compose and PostgreSQL copies, an operator approval flow, database recovery, signed receipts and a local web Console. That combination is our Frankenstein entry: the pieces are familiar, but the result connects an agent's proposed action to a measured outcome and a verifiable recovery record.
 
@@ -82,7 +105,7 @@ Extend bypass detection to untested PostgreSQL mechanisms such as event triggers
 
 ## Built with
 
-Kiro CLI and IDE, Kiro specs/steering/agents/hooks, Node.js (24+), JavaScript, `@modelcontextprotocol/server`, `yaml`, `zod`, Docker Compose, PostgreSQL 16, Node's built-in HTTP server, Ed25519 signatures, and `fast-check` for development tests. The Console uses no front-end framework.
+Kiro (specs, steering, hooks, custom agents, MCP), Kiro CLI and IDE, Node.js (24+), JavaScript, Docker / Docker Compose, PostgreSQL 16, MCP SDK (`@modelcontextprotocol/server`), `yaml`, `zod`, Ed25519 signatures, GitHub Actions, Node's built-in HTTP server, and `fast-check` for development tests. The Console uses no front-end framework.
 
 ## Submission video
 
